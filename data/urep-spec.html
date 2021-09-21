@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Broken UTF-8</title>
+	<style>
+	* {
+		font-size: 1em;
+	}
+	</style>
+</head>
+<body>
+<h1>Broken UTF-8</h1>
+<p>Any copyright to this file is dedicated to the Public Domain. <a href=https://creativecommons.org/publicdomain/zero/1.0/>https://creativecommons.org/publicdomain/zero/1.0/</a></p>
+<p>Five-byte and six-byte sequences were defined in <a href=https://tools.ietf.org/html/rfc2279>RFC 2297</a> but are no longer part of the UTF-8 definition.
+<h2>Non-shortest forms for lowest single-byte (U+0000)</h2>
+<dl>
+<dt>Two-byte sequence (C0 80)</dt>
+<dd>��</dd>
+<dt>Three-byte sequence (E0 80 80)</dt>
+<dd>���</dd>
+<dt>Four-byte sequence (F0 80 80 80)</dt>
+<dd>����</dd>
+<dt>Five-byte sequence (F8 80 80 80 80)</dt>
+<dd>�����</dd>
+<dt>Six-byte sequence (FC 80 80 80 80 80)</dt>
+<dd>������</dd>
+</dl>
+<h2>Non-shortest forms for highest single-byte (U+007F)</h2>
+<dl>
+<dt>Two-byte sequence (C1 BF)</dt>
+<dd>��</dd>
+<dt>Three-byte sequence (E0 81 BF)</dt>
+<dd>���</dd>
+<dt>Four-byte sequence (F0 80 81 BF)</dt>
+<dd>����</dd>
+<dt>Five-byte sequence (F8 80 80 81 BF)</dt>
+<dd>�����</dd>
+<dt>Six-byte sequence (FC 80 80 80 81 BF)</dt>
+<dd>������</dd>
+</dl>
+<h2>Non-shortest forms for lowest two-byte (U+0080)</h2>
+<dl>
+<dt>Three-byte sequence (E0 82 80)</dt>
+<dd>���</dd>
+<dt>Four-byte sequence (F0 80 82 80)</dt>
+<dd>����</dd>
+<dt>Five-byte sequence (F8 80 80 82 80)</dt>
+<dd>�����</dd>
+<dt>Six-byte sequence (FC 80 80 80 82 80)</dt>
+<dd>������</dd>
+</dl>
+<h2>Non-shortest forms for highest two-byte (U+07FF)</h2>
+<dl>
+<dt>Three-byte sequence (E0 9F BF)</dt>
+<dd>���</dd>
+<dt>Four-byte sequence (F0 80 9F BF)</dt>
+<dd>����</dd>
+<dt>Five-byte sequence (F8 80 80 9F BF)</dt>
+<dd>�����</dd>
+<dt>Six-byte sequence (FC 80 80 80 9F BF)</dt>
+<dd>������</dd>
+</dl>
+<h2>Non-shortest forms for lowest three-byte (U+0800)</h2>
+<dl>
+<dt>Four-byte sequence (F0 80 A0 80)</dt>
+<dd>����</dd>
+<dt>Five-byte sequence (F8 80 80 A0 80)</dt>
+<dd>�����</dd>
+<dt>Six-byte sequence (FC 80 80 80 A0 80)</dt>
+<dd>������</dd>
+</dl>
+<h2>Non-shortest forms for highest three-byte (U+FFFF)</h2>
+<dl>
+<dt>Four-byte sequence (F0 8F BF BF)</dt>
+<dd>����</dd>
+<dt>Five-byte sequence (F8 80 8F BF BF)</dt>
+<dd>�����</dd>
+<dt>Six-byte sequence (FC 80 80 8F BF BF)</dt>
+<dd>������</dd>
+</dl>
+<h2>Non-shortest forms for lowest four-byte (U+10000)</h2>
+<dl>
+<dt>Five-byte sequence (F8 80 90 80 80)</dt>
+<dd>�����</dd>
+<dt>Six-byte sequence (FC 80 80 90 80 80)</dt>
+<dd>������</dd>
+</dl>
+<h2>Non-shortest forms for last Unicode (U+10FFFF)</h2>
+<dl>
+<dt>Five-byte sequence (F8 84 8F BF BF)</dt>
+<dd>�����</dd>
+<dt>Six-byte sequence (FC 80 84 8F BF BF)</dt>
+<dd>������</dd>
+</dl>
+<h2>Out of range</h2>
+<dl>
+<dt>One past Unicode (F4 90 80 80)</dt>
+<dd>����</dd>
+<dt>Longest five-byte sequence (FB BF BF BF BF)</dt>
+<dd>�����</dd>
+<dt>Longest six-byte sequence (FD BF BF BF BF BF)</dt>
+<dd>������</dd>
+<dt>First surrogate (ED A0 80)</dt>
+<dd>���</dd>
+<dt>Last surrogate (ED BF BF)</dt>
+<dd>���</dd>
+<dt>CESU-8 surrogate pair (ED A0 BD ED B2 A9)</dt>
+<dd>������</dd>
+</dl>
+<h2>Out of range and non-shortest</h2>
+<dl>
+<dt>One past Unicode as five-byte sequence (F8 84 90 80 80)</dt>
+<dd>�����</dd>
+<dt>One past Unicode as six-byte sequence (FC 80 84 90 80 80)</dt>
+<dd>������</dd>
+<dt>First surrogate as four-byte sequence (F0 8D A0 80)</dt>
+<dd>����</dd>
+<dt>Last surrogate as four-byte sequence (F0 8D BF BF)</dt>
+<dd>����</dd>
+<dt>CESU-8 surrogate pair as two four-byte overlongs (F0 8D A0 BD F0 8D B2 A9)</dt>
+<dd>��������</dd>
+</dl>
+<h2>Lone trails</h2>
+<dl>
+<dt>One (80)</dt>
+<dd>�</dd>
+<dt>Two (80 80)</dt>
+<dd>��</dd>
+<dt>Three (80 80 80)</dt>
+<dd>���</dd>
+<dt>Four (80 80 80 80)</dt>
+<dd>����</dd>
+<dt>Five (80 80 80 80 80)</dt>
+<dd>�����</dd>
+<dt>Six (80 80 80 80 80 80)</dt>
+<dd>������</dd>
+<dt>Seven (80 80 80 80 80 80 80)</dt>
+<dd>�������</dd>
+<dt>After valid two-byte (C2 B6 80)</dt>
+<dd>¶�</dd>
+<dt>After valid three-byte (E2 98 83 80)</dt>
+<dd>☃�</dd>
+<dt>After valid four-byte (F0 9F 92 A9 80)</dt>
+<dd>💩�</dd>
+<dt>After five-byte (FB BF BF BF BF 80)</dt>
+<dd>������</dd>
+<dt>After six-byte (FD BF BF BF BF BF 80)</dt>
+<dd>�������</dd>
+</dl>
+<h2>Truncated sequences</h2>
+<dl>
+<dt>Two-byte lead (C2)</dt>
+<dd>�</dd>
+<dt>Three-byte lead (E2)</dt>
+<dd>�</dd>
+<dt>Three-byte lead and one trail (E2 98)</dt>
+<dd>�</dd>
+<dt>Four-byte lead (F0)</dt>
+<dd>�</dd>
+<dt>Four-byte lead and one trail (F0 9F)</dt>
+<dd>�</dd>
+<dt>Four-byte lead and two trails (F0 9F 92)</dt>
+<dd>�</dd>
+</dl>
+<h2>Leftovers</h2>
+<dl>
+<dt>FE (FE)</dt>
+<dd>�</dd>
+<dt>FE and trail (FE 80)</dt>
+<dd>��</dd>
+<dt>FF (FF)</dt>
+<dd>�</dd>
+<dt>FF and trail (FF 80)</dt>
+<dd>��</dd>
+</dl>
+</body>
+</html>
