@@ -25,14 +25,17 @@ be appropriately added on decoding errors as it should be for security
 reasons. See the `Seq` iterator example and more information on this
 below.
 
-Two implementation are provided which differ only in their UTF-8
+A few implementation are provided which differ only in their UTF-8
 treatment:
 
 1. [`utf_x_adhoc.ml`](utf_x_adhoc.ml), uses a 256 bytes string to index
    the cases mentionned in [TUS Table 3.7][tus] and then performs some
    ugly ad-hoc decoding. This ugly code is mine :-)
-       
-2. [`utf_x_nfa.ml`](utf_x_nfa.ml), uses the UTF-8 decoding MIT-licensed
+     
+2. [`utf_x_if.ml`](utf_x_if.ml), is similar to adhoc, but uses `if`
+   branches instead of a table.
+     
+3. [`utf_x_nfa.ml`](utf_x_nfa.ml), uses the UTF-8 decoding MIT-licensed
    DFA devised by Bjoern Hoehrmann [here][dfa]. This uses a 364 bytes
    string for the DFA and makes the decoding code much more elegant (if 
    I hadn't to rewrite it to a an imperative loop to make it more 

@@ -17,7 +17,7 @@
 let log fmt = Printf.printf (fmt ^^ "\n%!")
 
 let impl_to_string = function
-| `Uutf -> "UUTF" | `Dfa -> "DFA" | `Adhoc -> "ADHOC"
+| `Uutf -> "UUTF" | `Dfa -> "DFA" | `Adhoc -> "ADHOC" | `If -> "IF"
 
 (* Data preparation. We take any file read it and duplicate
    its content until we get at least a 1GB string. *)
@@ -44,6 +44,17 @@ let get_data file =
 
 (* Best-effort decode *)
 
+let adhoc_best_effort_decode s =
+  let rec loop b i =
+    if i >= Utf_x_adhoc.Bytes.length b then () else
+    let d = Utf_x_adhoc.Bytes.get_utf_8_uchar b i in
+    let used = Utf_x_adhoc.Bytes.utf_x_decode_used_bytes d in
+    let u = Utf_x_adhoc.Bytes.utf_x_decode_uchar d in
+    Sys.opaque_identity @@ (ignore u);
+    loop b (i + used)
+  in
+  loop (Bytes.unsafe_of_string s) 0
+
 let dfa_best_effort_decode s =
   let rec loop b i =
     if i >= Utf_x_dfa.Bytes.length b then () else
@@ -55,12 +66,12 @@ let dfa_best_effort_decode s =
   in
   loop (Bytes.unsafe_of_string s) 0
 
-let adhoc_best_effort_decode s =
+let if_best_effort_decode s =
   let rec loop b i =
-    if i >= Utf_x_adhoc.Bytes.length b then () else
-    let d = Utf_x_adhoc.Bytes.get_utf_8_uchar b i in
-    let used = Utf_x_adhoc.Bytes.utf_x_decode_used_bytes d in
-    let u = Utf_x_adhoc.Bytes.utf_x_decode_uchar d in
+    if i >= Utf_x_if.Bytes.length b then () else
+    let d = Utf_x_if.Bytes.get_utf_8_uchar b i in
+    let used = Utf_x_if.Bytes.utf_x_decode_used_bytes d in
+    let u = Utf_x_if.Bytes.utf_x_decode_uchar d in
     Sys.opaque_identity @@ (ignore u);
     loop b (i + used)
   in
@@ -80,32 +91,28 @@ let best_effort_decode impl file =
   match impl with
   | `Dfa -> dfa_best_effort_decode s
   | `Adhoc -> adhoc_best_effort_decode s
+  | `If -> if_best_effort_decode s
   | `Uutf -> uutf_best_effort_decode s
 
-(* Validate *)
-
-let uutf_validate s =
-  let f () _ = function
-  | `Uchar u -> Sys.opaque_identity @@ ignore u
-  | `Malformed u -> raise Exit
-  in
-  try Uutf.String.fold_utf_8 f () s; true with
-  | Exit -> false
-
-let dfa_validate = Utf_x_dfa.Bytes.is_valid_utf_8
-let adhoc_validate = Utf_x_adhoc.Bytes.is_valid_utf_8
-
-let validate impl file =
-  let s, size_gb = get_data file in
-  log "Validating %.2fGB of data with %s" size_gb (impl_to_string impl);
-  let valid = match impl with
-  | `Uutf -> uutf_validate s
-  | `Dfa -> dfa_validate (Bytes.unsafe_of_string s)
-  | `Adhoc -> adhoc_validate (Bytes.unsafe_of_string s)
-  in
-  log "Valid: %b" valid
-
 (* Recode *)
+
+let adhoc_recode s =
+  let rec loop b i b' j =
+    if i >= Utf_x_adhoc.Bytes.length b then (Bytes.unsafe_to_string b') else
+    let d = Utf_x_adhoc.Bytes.get_utf_8_uchar b i in
+    match Utf_x_adhoc.Bytes.utf_x_decode_valid d with
+    | false -> raise Exit
+    | true ->
+        let used = Utf_x_adhoc.Bytes.utf_x_decode_used_bytes d in
+        let u = Utf_x_adhoc.Bytes.utf_x_decode_uchar d in
+        let used' = Utf_x_adhoc.Bytes.set_utf_8_uchar b' j u in
+        if used' < 0 then raise Exit else
+        loop b (i + used) b' (j + used')
+  in
+  try
+    let b' = Bytes.create (String.length s) in
+    Some (loop (Bytes.unsafe_of_string s) 0 b' 0)
+  with Exit -> None
 
 let dfa_recode s =
   let rec loop b i b' j =
@@ -125,15 +132,15 @@ let dfa_recode s =
     Some (loop (Bytes.unsafe_of_string s) 0 b' 0)
   with Exit -> None
 
-let adhoc_recode s =
+let if_recode s =
   let rec loop b i b' j =
-    if i >= Utf_x_adhoc.Bytes.length b then (Bytes.unsafe_to_string b') else
-    let d = Utf_x_adhoc.Bytes.get_utf_8_uchar b i in
-    match Utf_x_adhoc.Bytes.utf_x_decode_valid d with
+    if i >= Utf_x_if.Bytes.length b then (Bytes.unsafe_to_string b') else
+    let d = Utf_x_if.Bytes.get_utf_8_uchar b i in
+    match Utf_x_if.Bytes.utf_x_decode_valid d with
     | false -> raise Exit
     | true ->
-        let used = Utf_x_adhoc.Bytes.utf_x_decode_used_bytes d in
-        let u = Utf_x_adhoc.Bytes.utf_x_decode_uchar d in
+        let used = Utf_x_if.Bytes.utf_x_decode_used_bytes d in
+        let u = Utf_x_if.Bytes.utf_x_decode_uchar d in
         let used' = Utf_x_adhoc.Bytes.set_utf_8_uchar b' j u in
         if used' < 0 then raise Exit else
         loop b (i + used) b' (j + used')
@@ -159,8 +166,9 @@ let recode impl file =
   Gc.full_major ();
   log "Recoding %.2fGB of data with %s decode" size_gb (impl_to_string impl);
   let s' = match impl with
-  | `Dfa -> dfa_recode s
   | `Adhoc -> adhoc_recode s
+  | `If -> if_recode s
+  | `Dfa -> dfa_recode s
   | `Uutf -> uutf_recode s
   in
   match s' with
@@ -168,22 +176,48 @@ let recode impl file =
   | Some s' when String.equal s s' -> log "Recode sucess!"
   | Some _ -> assert false
 
+(* Validate *)
+
+let adhoc_validate = Utf_x_adhoc.Bytes.is_valid_utf_8
+let dfa_validate = Utf_x_dfa.Bytes.is_valid_utf_8
+let if_validate = Utf_x_if.Bytes.is_valid_utf_8
+let uutf_validate s =
+  let f () _ = function
+  | `Uchar u -> Sys.opaque_identity @@ ignore u
+  | `Malformed u -> raise Exit
+  in
+  try Uutf.String.fold_utf_8 f () s; true with
+  | Exit -> false
+
+let validate impl file =
+  let s, size_gb = get_data file in
+  log "Validating %.2fGB of data with %s" size_gb (impl_to_string impl);
+  let valid = match impl with
+  | `Adhoc -> adhoc_validate (Bytes.unsafe_of_string s)
+  | `Dfa -> dfa_validate (Bytes.unsafe_of_string s)
+  | `If -> if_validate (Bytes.unsafe_of_string s)
+  | `Uutf -> uutf_validate s
+  in
+  log "Valid: %b" valid
+
 (* Command line interface *)
 
 let do_cmd cmd impl file = match cmd with
 | `Decode -> best_effort_decode impl file
-| `Validate -> validate impl file
 | `Recode -> recode impl file
+| `Validate -> validate impl file
 
 let main () =
   let usage = "Usage: perf8 [--dfa | --adhoc | --uutf] FILE" in
   let impl = ref `Adhoc in
   let cmd = ref `Decode in
   let args =
-    [ "--dfa", Arg.Unit (fun () -> impl := `Dfa),
-      "Test the DFA implementation";
-      "--adhoc", Arg.Unit (fun () -> impl := `Adhoc),
+    [ "--adhoc", Arg.Unit (fun () -> impl := `Adhoc),
       "Test the adhoc implementation (default).";
+      "--dfa", Arg.Unit (fun () -> impl := `Dfa),
+      "Test the DFA implementation";
+      "--if", Arg.Unit (fun () -> impl := `If),
+      "Test the if branches implementation (default).";
       "--uutf", Arg.Unit (fun () -> impl := `Uutf),
       "Test the Uutf implementation.";
       "--decode", Arg.Unit (fun () -> cmd := `Decode),

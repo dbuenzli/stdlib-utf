@@ -13,7 +13,6 @@
 (*                                                                        *)
 (**************************************************************************)
 
-
 let log fmt = Printf.printf (fmt ^^ "\n%!")
 
 let string_of_file file =
@@ -21,6 +20,16 @@ let string_of_file file =
   let len = in_channel_length ic in
   let buf = Bytes.create len in
   really_input ic buf 0 len; close_in ic; Bytes.unsafe_to_string buf
+
+let adhoc_trip s b =
+  let rec loop b i buf =
+    if i >= Utf_x_adhoc.Bytes.length b then () else
+    let d = Utf_x_adhoc.Bytes.get_utf_8_uchar b i in
+    let used = Utf_x_adhoc.Bytes.utf_x_decode_used_bytes d in
+    Buffer.add_utf_8_uchar buf (Utf_x_adhoc.Bytes.utf_x_decode_uchar d);
+    loop b (i + used) buf
+  in
+  loop (Bytes.unsafe_of_string s) 0 b
 
 let dfa_trip s b =
   let rec loop b i buf =
@@ -32,12 +41,12 @@ let dfa_trip s b =
   in
   loop (Bytes.unsafe_of_string s) 0 b
 
-let adhoc_trip s b =
+let if_trip s b =
   let rec loop b i buf =
-    if i >= Utf_x_adhoc.Bytes.length b then () else
-    let d = Utf_x_adhoc.Bytes.get_utf_8_uchar b i in
-    let used = Utf_x_adhoc.Bytes.utf_x_decode_used_bytes d in
-    Buffer.add_utf_8_uchar buf (Utf_x_adhoc.Bytes.utf_x_decode_uchar d);
+    if i >= Utf_x_if.Bytes.length b then () else
+    let d = Utf_x_if.Bytes.get_utf_8_uchar b i in
+    let used = Utf_x_if.Bytes.utf_x_decode_used_bytes d in
+    Buffer.add_utf_8_uchar buf (Utf_x_if.Bytes.utf_x_decode_uchar d);
     loop b (i + used) buf
   in
   loop (Bytes.unsafe_of_string s) 0 b
@@ -53,8 +62,9 @@ let trip impl file =
   let s = string_of_file file in
   let b = Buffer.create (String.length s) in
   let () = match impl with
-  | `Dfa -> dfa_trip s b
   | `Adhoc -> adhoc_trip s b
+  | `Dfa -> dfa_trip s b
+  | `If -> if_trip s b
   | `Uutf -> uutf_trip s b
   in
   print_string (Buffer.contents b)
@@ -65,10 +75,12 @@ let main () =
   let usage = "Usage: trip8 [--dfa | --adhoc | --uutf] FILE" in
   let impl = ref `Adhoc in
   let args =
-    [ "--dfa", Arg.Unit (fun () -> impl := `Dfa),
-      "Use the DFA implementation";
-      "--adhoc", Arg.Unit (fun () -> impl := `Adhoc),
+    [ "--adhoc", Arg.Unit (fun () -> impl := `Adhoc),
       "Use the adhoc implementation (default).";
+      "--dfa", Arg.Unit (fun () -> impl := `Dfa),
+      "Use the DFA implementation";
+      "--if", Arg.Unit (fun () -> impl := `If),
+      "Use the if branches implementation.";
       "--uutf", Arg.Unit (fun () -> impl := `Uutf),
       "Use the Uutf implementation." ]
   in

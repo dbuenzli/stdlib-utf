@@ -117,7 +117,7 @@ let utf8_decode_test (module Utf_x : Utf_x.S) bmap =
         in
         let u = Uchar.to_int u in
         let seq = Bytes.unsafe_to_string seq in
-        fail "Failure on sequence '%S', spec:%s decode: U+%04d, valid:%b"
+        fail "Failure on sequence %s, spec:%S decode: U+%04d, valid:%b"
           spec seq u valid
   in
   let s1 = Bytes.create 1
@@ -168,10 +168,12 @@ let main () =
   let usage = "Usage: test [--dfa | --adhoc] " in
   let impl = ref (module Utf_x_adhoc : Utf_x.S) in
   let args =
-    [ "--dfa", Arg.Unit (fun () -> impl := (module Utf_x_dfa : Utf_x.S)),
+    [ "--adhoc", Arg.Unit (fun () -> impl := (module Utf_x_adhoc : Utf_x.S)),
+      "Test the adhoc implementation (default).";
+      "--dfa", Arg.Unit (fun () -> impl := (module Utf_x_dfa : Utf_x.S)),
       "Test the DFA implementation";
-      "--adhoc", Arg.Unit (fun () -> impl := (module Utf_x_adhoc : Utf_x.S)),
-      "Test the adhoc implementation (default)."]
+      "--if", Arg.Unit (fun () -> impl := (module Utf_x_if : Utf_x.S)),
+      "Test the if branches implementation." ]
   in
   let fail_pos s = raise (Arg.Bad (strf "Don't know what to do with %S" s)) in
   Arg.parse args fail_pos usage;
