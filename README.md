@@ -42,8 +42,8 @@ treatment:
    I hadn't to rewrite it to an imperative loop to make it more 
    efficient).
    
-Rough benchmarks made with [`perf.ml`](perf.ml) and measured via
-`time` on my machine seems to indicate we have in ordered by most
+Rough benchmarks made with [`perf8.ml`](perf8.ml) and measured via
+`time` on my machine seems to indicate we have, ordered by most
 performant:  `pat`, `if`, `adhoc` and `dfa`.
 
 The first three being quite close to each other (within
@@ -52,7 +52,7 @@ the following percentage of the time taken by the `dfa` version.
 
 * 62% [Markus Kuhn's UTF-8 demo][kuhn-utf-8]. A mixture of 
   things.
-* 62% [Hindi wikipedia articles multistream][hindi-wiki] dataset
+* 62% [Hindi wikipedia articles multistream][hindi-wiki] dataset.
   Exercises ASCII and [Devanagari][devanagari] decodes which are 
   three bytes long in UTF-8.
 * 58% [Croatian wikipedia articles multistream][hr-wiki] dataset.
