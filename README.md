@@ -31,29 +31,37 @@ treatment:
 1. [`utf_x_adhoc.ml`](utf_x_adhoc.ml), uses a 256 bytes string to index
    the cases mentionned in [TUS Table 3.7][tus] and then performs some
    ugly ad-hoc decoding. This ugly code is mine :-)
-     
 2. [`utf_x_if.ml`](utf_x_if.ml), is similar to adhoc, but uses `if`
-   branches instead of a table.
-     
-3. [`utf_x_nfa.ml`](utf_x_nfa.ml), uses the UTF-8 decoding MIT-licensed
+   branches instead of a table, the result is a bit harder to comprehend.
+3. [`utf_x_pat.ml`](utf_x_pat.ml), is similar to adhoc but lets my
+   favourite compiler work out the dispatch table itself by using pattern 
+   matching on byte ranges. Yay !
+4. [`utf_x_dfa.ml`](utf_x_dfa.ml), uses the UTF-8 decoding MIT-licensed
    DFA devised by Bjoern Hoehrmann [here][dfa]. This uses a 364 bytes
    string for the DFA and makes the decoding code much more elegant (if 
-   I hadn't to rewrite it to a an imperative loop to make it more 
+   I hadn't to rewrite it to an imperative loop to make it more 
    efficient).
    
 Rough benchmarks made with [`perf.ml`](perf.ml) and measured via
-`time` on my machine seems to indicate the ad-hoc version takes the
-following percentage of the time taken by the DFA version.
+`time` on my machine seems to indicate we have in ordered by most
+performant:  `pat`, `if`, `adhoc` and `dfa`.
 
-* 72% [Markus Kuhn's UTF-8 demo][kuhn-utf-8]. A mixture of 
+The first three being quite close to each other (within
+10%). Comparing the fastest to the slowest, the `pat` version takes
+the following percentage of the time taken by the `dfa` version.
+
+* 62% [Markus Kuhn's UTF-8 demo][kuhn-utf-8]. A mixture of 
   things.
-* 67% [Hindi wikipedia articles multistream][hindi-wiki] dataset
+* 62% [Hindi wikipedia articles multistream][hindi-wiki] dataset
   Exercises ASCII and [Devanagari][devanagari] decodes which are 
   three bytes long in UTF-8.
-* 60% [Croatian wikipedia articles multistream][hr-wiki] dataset.
+* 58% [Croatian wikipedia articles multistream][hr-wiki] dataset.
   Exercises ASCII and [Latin Extended-A][latin-ext-A] decodes which
   are two bytes long in UTF-8.
-  
+* 56% on this README, mainly ASCII.
+
+So I think the best candidate for upstreaming would be `pat`.
+
 ## Best-effort decodes and U+FFFD replacements
 
 The API also tries to take into account recommended strategies for

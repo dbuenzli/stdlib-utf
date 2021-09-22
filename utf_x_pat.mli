@@ -13,4 +13,4 @@
 (*                                                                        *)
 (**************************************************************************)
 
-(* TODO what we will add to the compiler test suite. *)
+include Utf_x.S

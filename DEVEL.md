@@ -1,6 +1,7 @@
 Running stuff.
 
 ```
+opam install uutf
 opam pin add b0 --dev
 curl -L https://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-demo.txt \
         > data/UTF-8-demo.txt 

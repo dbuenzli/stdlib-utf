@@ -165,7 +165,7 @@ let test impl =
   log "All tests succeeded.\n"
 
 let main () =
-  let usage = "Usage: test [--dfa | --adhoc] " in
+  let usage = "Usage: test [--adhoc | --dfa | --if | --pat] " in
   let impl = ref (module Utf_x_adhoc : Utf_x.S) in
   let args =
     [ "--adhoc", Arg.Unit (fun () -> impl := (module Utf_x_adhoc : Utf_x.S)),
@@ -173,7 +173,9 @@ let main () =
       "--dfa", Arg.Unit (fun () -> impl := (module Utf_x_dfa : Utf_x.S)),
       "Test the DFA implementation";
       "--if", Arg.Unit (fun () -> impl := (module Utf_x_if : Utf_x.S)),
-      "Test the if branches implementation." ]
+      "Test the if branches implementation.";
+      "--pat", Arg.Unit (fun () -> impl := (module Utf_x_pat : Utf_x.S)),
+      "Test the pattern implementation." ]
   in
   let fail_pos s = raise (Arg.Bad (strf "Don't know what to do with %S" s)) in
   Arg.parse args fail_pos usage;

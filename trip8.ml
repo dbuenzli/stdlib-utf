@@ -51,6 +51,16 @@ let if_trip s b =
   in
   loop (Bytes.unsafe_of_string s) 0 b
 
+let pat_trip s b =
+  let rec loop b i buf =
+    if i >= Utf_x_pat.Bytes.length b then () else
+    let d = Utf_x_pat.Bytes.get_utf_8_uchar b i in
+    let used = Utf_x_pat.Bytes.utf_x_decode_used_bytes d in
+    Buffer.add_utf_8_uchar buf (Utf_x_pat.Bytes.utf_x_decode_uchar d);
+    loop b (i + used) buf
+  in
+  loop (Bytes.unsafe_of_string s) 0 b
+
 let uutf_trip s b =
   let f b _ = function
   | `Uchar u -> Buffer.add_utf_8_uchar b u; b
@@ -65,6 +75,7 @@ let trip impl file =
   | `Adhoc -> adhoc_trip s b
   | `Dfa -> dfa_trip s b
   | `If -> if_trip s b
+  | `Pat -> pat_trip s b
   | `Uutf -> uutf_trip s b
   in
   print_string (Buffer.contents b)
@@ -72,7 +83,7 @@ let trip impl file =
 (* Command line interface *)
 
 let main () =
-  let usage = "Usage: trip8 [--dfa | --adhoc | --uutf] FILE" in
+  let usage = "Usage: trip8 [--adhoc | --dfa | --if | --pat | --uutf] FILE" in
   let impl = ref `Adhoc in
   let args =
     [ "--adhoc", Arg.Unit (fun () -> impl := `Adhoc),
@@ -81,6 +92,8 @@ let main () =
       "Use the DFA implementation";
       "--if", Arg.Unit (fun () -> impl := `If),
       "Use the if branches implementation.";
+      "--pat", Arg.Unit (fun () -> impl := `Pat),
+      "Use the pattern implementation.";
       "--uutf", Arg.Unit (fun () -> impl := `Uutf),
       "Use the Uutf implementation." ]
   in

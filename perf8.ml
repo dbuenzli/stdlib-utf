@@ -17,7 +17,8 @@
 let log fmt = Printf.printf (fmt ^^ "\n%!")
 
 let impl_to_string = function
-| `Uutf -> "UUTF" | `Dfa -> "DFA" | `Adhoc -> "ADHOC" | `If -> "IF"
+| `Adhoc -> "ADHOC" | `Dfa -> "DFA" | `If -> "IF" | `Pat -> "PAT"
+| `Uutf -> "UUTF"
 
 (* Data preparation. We take any file read it and duplicate
    its content until we get at least a 1GB string. *)
@@ -77,6 +78,17 @@ let if_best_effort_decode s =
   in
   loop (Bytes.unsafe_of_string s) 0
 
+let pat_best_effort_decode s =
+  let rec loop b i =
+    if i >= Utf_x_pat.Bytes.length b then () else
+    let d = Utf_x_pat.Bytes.get_utf_8_uchar b i in
+    let used = Utf_x_pat.Bytes.utf_x_decode_used_bytes d in
+    let u = Utf_x_pat.Bytes.utf_x_decode_uchar d in
+    Sys.opaque_identity @@ (ignore u);
+    loop b (i + used)
+  in
+  loop (Bytes.unsafe_of_string s) 0
+
 let uutf_best_effort_decode s =
   let f () _ = function
   | `Uchar u -> Sys.opaque_identity @@ ignore u
@@ -89,9 +101,10 @@ let best_effort_decode impl file =
   Gc.full_major ();
   log "Decoding %.2fGB of data with %s" size_gb (impl_to_string impl);
   match impl with
-  | `Dfa -> dfa_best_effort_decode s
   | `Adhoc -> adhoc_best_effort_decode s
+  | `Dfa -> dfa_best_effort_decode s
   | `If -> if_best_effort_decode s
+  | `Pat -> pat_best_effort_decode s
   | `Uutf -> uutf_best_effort_decode s
 
 (* Recode *)
@@ -141,7 +154,25 @@ let if_recode s =
     | true ->
         let used = Utf_x_if.Bytes.utf_x_decode_used_bytes d in
         let u = Utf_x_if.Bytes.utf_x_decode_uchar d in
-        let used' = Utf_x_adhoc.Bytes.set_utf_8_uchar b' j u in
+        let used' = Utf_x_if.Bytes.set_utf_8_uchar b' j u in
+        if used' < 0 then raise Exit else
+        loop b (i + used) b' (j + used')
+  in
+  try
+    let b' = Bytes.create (String.length s) in
+    Some (loop (Bytes.unsafe_of_string s) 0 b' 0)
+  with Exit -> None
+
+let pat_recode s =
+  let rec loop b i b' j =
+    if i >= Utf_x_pat.Bytes.length b then (Bytes.unsafe_to_string b') else
+    let d = Utf_x_pat.Bytes.get_utf_8_uchar b i in
+    match Utf_x_pat.Bytes.utf_x_decode_valid d with
+    | false -> raise Exit
+    | true ->
+        let used = Utf_x_pat.Bytes.utf_x_decode_used_bytes d in
+        let u = Utf_x_pat.Bytes.utf_x_decode_uchar d in
+        let used' = Utf_x_pat.Bytes.set_utf_8_uchar b' j u in
         if used' < 0 then raise Exit else
         loop b (i + used) b' (j + used')
   in
@@ -167,8 +198,9 @@ let recode impl file =
   log "Recoding %.2fGB of data with %s decode" size_gb (impl_to_string impl);
   let s' = match impl with
   | `Adhoc -> adhoc_recode s
-  | `If -> if_recode s
   | `Dfa -> dfa_recode s
+  | `If -> if_recode s
+  | `Pat -> pat_recode s
   | `Uutf -> uutf_recode s
   in
   match s' with
@@ -181,6 +213,7 @@ let recode impl file =
 let adhoc_validate = Utf_x_adhoc.Bytes.is_valid_utf_8
 let dfa_validate = Utf_x_dfa.Bytes.is_valid_utf_8
 let if_validate = Utf_x_if.Bytes.is_valid_utf_8
+let pat_validate = Utf_x_pat.Bytes.is_valid_utf_8
 let uutf_validate s =
   let f () _ = function
   | `Uchar u -> Sys.opaque_identity @@ ignore u
@@ -196,6 +229,7 @@ let validate impl file =
   | `Adhoc -> adhoc_validate (Bytes.unsafe_of_string s)
   | `Dfa -> dfa_validate (Bytes.unsafe_of_string s)
   | `If -> if_validate (Bytes.unsafe_of_string s)
+  | `Pat -> pat_validate (Bytes.unsafe_of_string s)
   | `Uutf -> uutf_validate s
   in
   log "Valid: %b" valid
@@ -208,7 +242,7 @@ let do_cmd cmd impl file = match cmd with
 | `Validate -> validate impl file
 
 let main () =
-  let usage = "Usage: perf8 [--dfa | --adhoc | --uutf] FILE" in
+  let usage = "Usage: perf8 [--adhoc | --dfa | --if | --pat | --uutf] FILE" in
   let impl = ref `Adhoc in
   let cmd = ref `Decode in
   let args =
@@ -217,7 +251,9 @@ let main () =
       "--dfa", Arg.Unit (fun () -> impl := `Dfa),
       "Test the DFA implementation";
       "--if", Arg.Unit (fun () -> impl := `If),
-      "Test the if branches implementation (default).";
+      "Test the if branches implementation.";
+      "--pat", Arg.Unit (fun () -> impl := `Pat),
+      "Test the pattern implementation.";
       "--uutf", Arg.Unit (fun () -> impl := `Uutf),
       "Test the Uutf implementation.";
       "--decode", Arg.Unit (fun () -> cmd := `Decode),

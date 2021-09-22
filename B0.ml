@@ -9,8 +9,10 @@ let iface = file "utf_x.mli"
 let adhoc_mli, adhoc_ml = file "utf_x_adhoc.mli", file "utf_x_adhoc.ml"
 let dfa_mli, dfa_ml = file "utf_x_dfa.mli", file "utf_x_dfa.ml"
 let if_mli, if_ml = file "utf_x_if.mli", file "utf_x_if.ml"
+let pat_mli, pat_ml = file "utf_x_pat.mli", file "utf_x_pat.ml"
 
-let all_impls = [iface; adhoc_mli; adhoc_ml; if_mli; if_ml; dfa_mli; dfa_ml; ]
+let all_impls =
+  [iface; adhoc_mli; adhoc_ml; if_mli; if_ml; dfa_mli; dfa_ml; pat_mli; pat_ml ]
 
 let examples =
   let srcs = [iface; adhoc_mli; adhoc_ml; file "examples.ml"] in
