@@ -9,7 +9,7 @@ on [Alain's comment][alain-comment] to avoid exceptions.
 For now we simply focus on providing an API in `Bytes`, the rest can
 follow easily and/or later. 
 
-We introduce the abstract type `Bytes.utf_x_decode` for decode results
+We introduce the abstract type `Uchar.utf_decode` for decode results
 which is just an `int` value that has the decoded `Uchar.t` (or
 `Uchar.rep` in case of decode error) in the lower bits and information
 about the decode in bits above `Uchar.max`. The scheme is compatible
