@@ -1,6 +1,8 @@
 Adding UTF-X decoding support to the OCaml Stdlib 
 =================================================
 
+[Upstream issue][upstream]. 
+
 Plays around improving [this old proposal][old-proposal]. Especially
 on [Alain's comment][alain-comment] to avoid exceptions. 
 
@@ -90,6 +92,7 @@ mentioned page can be used to test the WHATWG encoding standard
 behaviour (note that `Uutf` does not respect this).
 
 
+[upstream]: https://github.com/ocaml/ocaml/issues/10660
 [old-proposal]: https://gist.github.com/dbuenzli/211e1fb4d8dfce0d22c6d6616260cdd9
 [alain-comment]: https://gist.github.com/dbuenzli/211e1fb4d8dfce0d22c6d6616260cdd9#gistcomment-2574875
 [how-many-urep]: https://hsivonen.fi/broken-utf-8/
