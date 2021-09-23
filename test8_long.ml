@@ -105,8 +105,8 @@ let utf8_decode_test (module Utf_x : Utf_x.S) bmap =
   in
   let test seq =
     let dec = Bytes.get_utf_8_uchar seq 0 in
-    let valid = Bytes.utf_x_decode_valid dec in
-    let u = Bytes.utf_x_decode_uchar dec in
+    let valid = Uchar.utf_decode_is_valid dec in
+    let u = Uchar.utf_decode_uchar dec in
     match spec seq, (valid, u) with
     | `Uchar spec, (true, u) when Uchar.equal u spec -> `Decoded
     | `Malformed _, (false, u) when Uchar.equal u Uchar.rep -> `Malformed

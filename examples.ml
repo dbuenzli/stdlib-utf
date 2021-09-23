@@ -25,11 +25,11 @@ let fold_utf_8 : 'a folder -> 'a -> string -> 'a = fun f acc s ->
   let rec loop b i acc =
     if i >= Bytes.length b then acc else
     let dec = Bytes.get_utf_8_uchar b i in
-    let used = Bytes.utf_x_decode_used_bytes dec in
+    let used = Uchar.utf_decode_used_bytes dec in
     let i' = i + used in
-    match Bytes.utf_x_decode_valid dec with
+    match Uchar.utf_decode_is_valid dec with
     | false -> loop b i' (f acc i (`Malformed (String.sub s i used)))
-    | true -> loop b i' (f acc i (`Uchar (Bytes.utf_x_decode_uchar dec)))
+    | true -> loop b i' (f acc i (`Uchar (Uchar.utf_decode_uchar dec)))
   in
   loop (Bytes.unsafe_of_string s) 0 acc
 
@@ -43,7 +43,7 @@ let utf_8_string_to_uchar_seq  : string -> Uchar.t Seq.t = fun s ->
   let rec uchar b i () =
     if i >= Bytes.length b then Seq.Nil else
     let dec = Bytes.get_utf_8_uchar b i in
-    let u = Bytes.utf_x_decode_uchar dec in
-    Seq.Cons (u, uchar b (i + Bytes.utf_x_decode_used_bytes dec))
+    let u = Uchar.utf_decode_uchar dec in
+    Seq.Cons (u, uchar b (i + Uchar.utf_decode_used_bytes dec))
   in
   uchar (Bytes.unsafe_of_string s) 0

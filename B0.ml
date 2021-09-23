@@ -4,18 +4,22 @@ open B00_std
 let uutf = B0_ocaml.libname "uutf"
 
 let file v = `File (Fpath.v v)
+let mod_srcs n = file (n ^ ".mli"), file (n ^ ".ml")
 
 let iface = file "utf_x.mli"
-let adhoc_mli, adhoc_ml = file "utf_x_adhoc.mli", file "utf_x_adhoc.ml"
-let dfa_mli, dfa_ml = file "utf_x_dfa.mli", file "utf_x_dfa.ml"
-let if_mli, if_ml = file "utf_x_if.mli", file "utf_x_if.ml"
-let pat_mli, pat_ml = file "utf_x_pat.mli", file "utf_x_pat.ml"
+let uchar_mli, uchar_ml = mod_srcs "utf_uchar"
+let adhoc_mli, adhoc_ml = mod_srcs "utf_x_adhoc"
+let if_mli, if_ml = mod_srcs "utf_x_if"
+let dfa_mli, dfa_ml = mod_srcs "utf_x_dfa"
+let pat_mli, pat_ml = mod_srcs "utf_x_pat"
 
+let base = [iface; uchar_mli; uchar_ml]
 let all_impls =
-  [iface; adhoc_mli; adhoc_ml; if_mli; if_ml; dfa_mli; dfa_ml; pat_mli; pat_ml ]
+  [adhoc_mli; adhoc_ml; if_mli; if_ml; dfa_mli; dfa_ml; pat_mli; pat_ml ] @
+  base
 
 let examples =
-  let srcs = [iface; adhoc_mli; adhoc_ml; file "examples.ml"] in
+  let srcs = [adhoc_mli; adhoc_ml; file "examples.ml"] @ base in
   B0_ocaml.exe "examples" ~doc:"Sample code" ~srcs
 
 let test =
