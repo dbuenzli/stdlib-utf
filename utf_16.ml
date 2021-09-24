@@ -13,7 +13,6 @@
 (*                                                                        *)
 (**************************************************************************)
 
-
   (* This won't be needed *)
 
   let dec_err = Utf_uchar.utf_decode_error

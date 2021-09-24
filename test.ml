@@ -13,7 +13,7 @@
 (*                                                                        *)
 (**************************************************************************)
 
-(* TODO what we will add to the compiler test suite. *)
+(* To add to the compiler test suite. *)
 
 open Utf_x_pat
 
@@ -58,14 +58,11 @@ let uchar_map_of_spec spec =
     for b0 = bmin 0 to bmax 0 do Bytes.set_uint8 buf 0 b0;
       for b1 = bmin 1 to bmax 1 do Bytes.set_uint8 buf 1 b1;
         for b2 = bmin 2 to bmax 2 do Bytes.set_uint8 buf 2 b2;
-          for b3 = bmin 3 to bmax 3 do Bytes.set_uint8 buf 3 b3; add 4 done;
-          add 3;
-        done;
-        add 2;
-      done;
-      add 1;
-    done;
-    assert (!uchar - 1 = umax)
+          for b3 = bmin 3 to bmax 3 do Bytes.set_uint8 buf 3 b3; add 4
+          done; add 3;
+        done; add 2;
+      done; add 1;
+    done; assert (!uchar - 1 = umax)
   in
   List.iter add_range spec;
   map
@@ -113,5 +110,92 @@ let () =
 let () =
   test_utf utf_16le Uchar.utf_16_byte_length
     Bytes.get_utf_16le_uchar Bytes.set_utf_16le_uchar Bytes.is_valid_utf_16le
+
+let () =
+  (* Test out of bounds *)
+  let raises f = assert (try f (); false with Invalid_argument _ -> true) in
+  (raises @@ fun () -> Bytes.get_utf_8_uchar Bytes.empty 0);
+  (raises @@ fun () -> Bytes.set_utf_8_uchar Bytes.empty 0 Uchar.min);
+  (raises @@ fun () -> Bytes.get_utf_16le_uchar Bytes.empty 0);
+  (raises @@ fun () -> Bytes.set_utf_16le_uchar Bytes.empty 0 Uchar.min);
+  (raises @@ fun () -> Bytes.get_utf_16be_uchar Bytes.empty 0);
+  (raises @@ fun () -> Bytes.set_utf_16be_uchar Bytes.empty 0 Uchar.min);
+  ()
+
+let () =
+  (* Test lack of space encodes *)
+  let b = Bytes.make 1 '\xab' in
+  assert (Bytes.set_utf_8_uchar b 0 Uchar.max = 0 && Bytes.get b 0 = '\xab');
+  assert (Bytes.set_utf_16be_uchar b 0 Uchar.max = 0 && Bytes.get b 0 = '\xab');
+  assert (Bytes.set_utf_16le_uchar b 0 Uchar.max = 0 && Bytes.get b 0 = '\xab');
+  ()
+
+let () =
+  (* Test used bytes for replacement WHATWG recommandation.
+     These examples are from TUS p. 126-127 Unicode 14  *)
+  let b = Bytes.of_string "\xC0\xAF\xE0\x80\xBF\xF0\x81\x82\x41" in
+  let ok i = i = Bytes.length b - 1 in
+  for i = 0 to Bytes.length b - 1 do
+    let dec = Bytes.get_utf_8_uchar b i in
+    if not (ok i) then begin
+      assert (Uchar.utf_decode_is_valid dec = false);
+      assert (Uchar.utf_decode_used_bytes dec = 1);
+      assert (Uchar.equal (Uchar.utf_decode_uchar dec) Uchar.rep)
+    end else begin
+      assert (Uchar.utf_decode_is_valid dec = true);
+      assert (Uchar.utf_decode_used_bytes dec = 1);
+      assert (Uchar.equal (Uchar.utf_decode_uchar dec) (Uchar.of_int 0x0041))
+    end
+  done;
+  let b = Bytes.of_string "\xED\xA0\x80\xED\xBF\xBF\xED\xAF\x41" in
+  let ok i = i = Bytes.length b - 1 in
+  for i = 0 to Bytes.length b - 1 do
+    let dec = Bytes.get_utf_8_uchar b i in
+    if not (ok i) then begin
+      assert (Uchar.utf_decode_is_valid dec = false);
+      assert (Uchar.utf_decode_used_bytes dec = 1);
+      assert (Uchar.equal (Uchar.utf_decode_uchar dec) Uchar.rep)
+    end else begin
+      assert (Uchar.utf_decode_is_valid dec = true);
+      assert (Uchar.utf_decode_used_bytes dec = 1);
+      assert (Uchar.equal (Uchar.utf_decode_uchar dec) (Uchar.of_int 0x0041))
+    end
+  done;
+  let b = Bytes.of_string "\xF4\x91\x92\x93\xFF\x41\x80\xBF\x42" in
+  let ok i = i = 5 || i = 8 in
+  for i = 0 to Bytes.length b - 1 do
+    let dec = Bytes.get_utf_8_uchar b i in
+    if not (ok i) then begin
+      assert (Uchar.utf_decode_is_valid dec = false);
+      assert (Uchar.utf_decode_used_bytes dec = 1);
+      assert (Uchar.equal (Uchar.utf_decode_uchar dec) Uchar.rep)
+    end else begin
+      assert (Uchar.utf_decode_is_valid dec = true);
+      assert (Uchar.utf_decode_used_bytes dec = 1);
+      assert (Uchar.equal (Uchar.utf_decode_uchar dec)
+                (Uchar.of_char (Bytes.get b i)))
+    end
+  done;
+  let b = Bytes.of_string "\xE1\x80\xE2\xF0\x91\x92\xF1\xBF\x41" in
+  let d0 = Bytes.get_utf_8_uchar b 0 in
+  assert (Uchar.utf_decode_is_valid d0 = false);
+  assert (Uchar.utf_decode_used_bytes d0 = 2);
+  assert (Uchar.equal (Uchar.utf_decode_uchar d0) Uchar.rep);
+  let d2 = Bytes.get_utf_8_uchar b 2 in
+  assert (Uchar.utf_decode_is_valid d2 = false);
+  assert (Uchar.utf_decode_used_bytes d2 = 1);
+  assert (Uchar.equal (Uchar.utf_decode_uchar d2) Uchar.rep);
+  let d3 = Bytes.get_utf_8_uchar b 3 in
+  assert (Uchar.utf_decode_is_valid d3 = false);
+  assert (Uchar.utf_decode_used_bytes d3 = 3);
+  assert (Uchar.equal (Uchar.utf_decode_uchar d3) Uchar.rep);
+  let d6 = Bytes.get_utf_8_uchar b 6 in
+  assert (Uchar.utf_decode_is_valid d6 = false);
+  assert (Uchar.utf_decode_used_bytes d6 = 2);
+  assert (Uchar.equal (Uchar.utf_decode_uchar d6) Uchar.rep);
+  let d8 = Bytes.get_utf_8_uchar b 8 in
+  assert (Uchar.utf_decode_used_bytes d8 = 1);
+  assert (Uchar.equal (Uchar.utf_decode_uchar d8) (Uchar.of_int 0x0041));
+  ()
 
 let () = Printf.printf "All tests passed!\n"
