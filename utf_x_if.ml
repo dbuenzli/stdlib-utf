@@ -164,20 +164,20 @@ module Bytes = struct
         1
     | u when u <= 0x07FF ->
         let last = i + 1 in
-        if last > max then - 2 else
+        if last > max then 0 else
         (set_uint8 b i (0xC0 lor (u lsr 6));
          set b last (0x80 lor (u land 0x3F));
          2)
     | u when u <= 0xFFFF ->
         let last = i + 2 in
-        if last > max then -3 else
+        if last > max then 0 else
         (set_uint8 b i (0xE0 lor (u lsr 12));
          set b (i + 1) (0x80 lor ((u lsr 6) land 0x3F));
          set b last (0x80 lor (u land 0x3F));
          3)
     | u ->
         let last = i + 3 in
-        if last > max then -4 else
+        if last > max then 0 else
         (set_uint8 b i (0xF0 lor (u lsr 18));
          set b (i + 1) (0x80 lor ((u lsr 12) land 0x3F));
          set b (i + 2) (0x80 lor ((u lsr 6) land 0x3F));
@@ -275,10 +275,10 @@ module Bytes = struct
     | u when u < 0 -> assert false
     | u when u <= 0xFFFF ->
         let last = i + 1 in
-        if last > max then -2 else (set b i u; 2)
+        if last > max then 0 else (set b i u; 2)
     | u ->
         let last = i + 3 in
-        if last > max then -4 else
+        if last > max then 0 else
         let u' = u - 0x10000 in
         let hi = (0xD800 lor (u' lsr 10)) in
         let lo = (0xDC00 lor (u' land 0x3FF)) in
@@ -328,10 +328,10 @@ module Bytes = struct
     | u when u < 0 -> assert false
     | u when u <= 0xFFFF ->
         let last = i + 1 in
-        if last > max then -2 else (set b i u; 2)
+        if last > max then 0 else (set b i u; 2)
     | u ->
         let last = i + 3 in
-        if last > max then -4 else
+        if last > max then 0 else
         let u' = u - 0x10000 in
         let hi = (0xD800 lor (u' lsr 10)) in
         let lo = (0xDC00 lor (u' land 0x3FF)) in

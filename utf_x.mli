@@ -77,14 +77,11 @@ module Bytes : sig
       [b]. *)
 
   val set_utf_8_uchar : t -> int -> Uchar.t -> int
-  (** [set_utf_8_uchar b i u] UTF-8 encodes [u] at index [i] in [b].
-      If the result value [n] is:
-      {ul
-      {- [n > 0], [n] is the number of bytes that were used for encoding
-         [u]. A new character can be encoded at [i + n].}
-      {- [n < 0], [b] was left untouched because there was no space left
-         at [i] to encode [u]. [-n] is the total number of bytes needed for
-         encoding [u].}} *)
+  (** [set_utf_8_uchar b i u] UTF-8 encodes [u] at index [i] in [b]
+      and returns the number of bytes [n] that were written starting
+      at [i]. If [n] is [0] there was not enough space to encode [u]
+      at [i] and [b] was left untouched. Otherwise a new character can
+      be encoded at [i + n]. *)
 
   val is_valid_utf_8 : t -> bool
   (** [is_valid_utf_8 b] is [true] if and only if [b] contains valid
@@ -97,14 +94,11 @@ module Bytes : sig
       [i] in [b]. *)
 
   val set_utf_16be_uchar : t -> int -> Uchar.t -> int
-  (** [set_utf_16be_uchar b i u] UTF-16BE encodes [u] at index [i] in [b].
-      If the result value [n] is:
-      {ul
-      {- [n > 0], [n] is the number of bytes that were used for encoding
-         [u]. A new character can be encoded at [i + n].}
-      {- [n < 0], [b] was left untouched because there was no space left
-         at [i] to encode [u]. [-n] is the total number of bytes needed for
-         encoding [u].}} *)
+  (** [set_utf_16be_uchar b i u] UTF-16BE encodes [u] at index [i] in [b]
+      and returns the number of bytes [n] that were written starting
+      at [i]. If [n] is [0] there was not enough space to encode [u]
+      at [i] and [b] was left untouched. Otherwise a new character can
+      be encoded at [i + n]. *)
 
   val is_valid_utf_16be : t -> bool
   (** [is_valid_utf_16be b] is [true] if and only if [b] contains valid
@@ -117,14 +111,11 @@ module Bytes : sig
       [i] in [b]. *)
 
   val set_utf_16le_uchar : t -> int -> Uchar.t -> int
-  (** [set_utf_16le_uchar b i u] UTF-16LE encodes [u] at index [i] in [b].
-      If the result value [n] is:
-      {ul
-      {- [n > 0], [n] is the number of bytes that were used for encoding
-         [u]. A new character can be encoded at [i + n].}
-      {- [n < 0], [b] was left untouched because there was no space left
-         at [i] to encode [u]. [-n] is the total number of bytes needed for
-         encoding [u].}} *)
+  (** [set_utf_16le_uchar b i u] UTF-16LE encodes [u] at index [i] in [b]
+      and returns the number of bytes [n] that were written starting
+      at [i]. If [n] is [0] there was not enough space to encode [u]
+      at [i] and [b] was left untouched. Otherwise a new character can
+      be encoded at [i + n]. *)
 
   val is_valid_utf_16le : t -> bool
   (** [is_valid_utf_16le b] is [true] if and only if [b] contains valid

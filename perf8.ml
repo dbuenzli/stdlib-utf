@@ -118,9 +118,9 @@ let adhoc_recode s =
     | true ->
         let used = Utf_x_adhoc.Uchar.utf_decode_used_bytes d in
         let u = Utf_x_adhoc.Uchar.utf_decode_uchar d in
-        let used' = Utf_x_adhoc.Bytes.set_utf_8_uchar b' j u in
-        if used' < 0 then raise Exit else
-        loop b (i + used) b' (j + used')
+        match Utf_x_adhoc.Bytes.set_utf_8_uchar b' j u with
+        | 0 -> raise Exit
+        | used' -> loop b (i + used) b' (j + used')
   in
   try
     let b' = Bytes.create (String.length s) in
@@ -136,9 +136,9 @@ let dfa_recode s =
     | true ->
         let used = Utf_x_dfa.Uchar.utf_decode_used_bytes d in
         let u = Utf_x_dfa.Uchar.utf_decode_uchar d in
-        let used' = Utf_x_dfa.Bytes.set_utf_8_uchar b' j u in
-        if used' < 0 then raise Exit else
-        loop b (i + used) b' (j + used')
+        match Utf_x_dfa.Bytes.set_utf_8_uchar b' j u with
+        | 0 -> raise Exit
+        | used' -> loop b (i + used) b' (j + used')
   in
   try
     let b' = Bytes.create (String.length s) in
@@ -154,9 +154,9 @@ let if_recode s =
     | true ->
         let used = Utf_x_if.Uchar.utf_decode_used_bytes d in
         let u = Utf_x_if.Uchar.utf_decode_uchar d in
-        let used' = Utf_x_if.Bytes.set_utf_8_uchar b' j u in
-        if used' < 0 then raise Exit else
-        loop b (i + used) b' (j + used')
+        match Utf_x_if.Bytes.set_utf_8_uchar b' j u with
+        | 0 -> raise Exit
+        | used' -> loop b (i + used) b' (j + used')
   in
   try
     let b' = Bytes.create (String.length s) in
@@ -172,9 +172,9 @@ let pat_recode s =
     | true ->
         let used = Utf_x_pat.Uchar.utf_decode_used_bytes d in
         let u = Utf_x_pat.Uchar.utf_decode_uchar d in
-        let used' = Utf_x_pat.Bytes.set_utf_8_uchar b' j u in
-        if used' < 0 then raise Exit else
-        loop b (i + used) b' (j + used')
+        match Utf_x_pat.Bytes.set_utf_8_uchar b' j u with
+        | 0 -> raise Exit
+        | used' -> loop b (i + used) b' (j + used')
   in
   try
     let b' = Bytes.create (String.length s) in
@@ -205,7 +205,7 @@ let recode impl file =
   in
   match s' with
   | None -> log "Recode failure, non valid input data ?"
-  | Some s' when String.equal s s' -> log "Recode sucess!"
+  | Some s' when String.equal s s' -> log "Recode success!"
   | Some _ -> assert false
 
 (* Validate *)
