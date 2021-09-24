@@ -281,7 +281,7 @@ module Bytes = struct
     | hi -> (* combine [hi] with a low surrogate *)
         let last = i + 3 in
         if last > max then dec_err (max - i + 1) else
-        match get b i with
+        match get b (i + 2) with
         | u when u < 0xDC00 || u > 0xDFFF -> dec_err 2 (* retry here *)
         | lo ->
             let u = (((hi land 0x3FF) lsl 10) lor (lo land 0x3FF)) + 0x10000 in
@@ -315,7 +315,7 @@ module Bytes = struct
       | hi ->
           let last = i + 3 in
           if last > max then false else
-          match get b i with
+          match get b (i + 2) with
           | u when u < 0xDC00 || u > 0xDFFF -> false
           | lo -> loop max b (i + 4)
     in
@@ -334,7 +334,7 @@ module Bytes = struct
     | hi -> (* combine [hi] with a low surrogate *)
         let last = i + 3 in
         if last > max then dec_err (max - i + 1) else
-        match get b i with
+        match get b (i + 2) with
         | u when u < 0xDC00 || u > 0xDFFF -> dec_err 2 (* retry here *)
         | lo ->
             let u = (((hi land 0x3FF) lsl 10) lor (lo land 0x3FF)) + 0x10000 in
@@ -348,10 +348,10 @@ module Bytes = struct
     | u when u < 0 -> assert false
     | u when u <= 0xFFFF ->
         let last = i + 1 in
-        if last > max then 0 else (set b i u; 2)
+        if last > max then -2 else (set b i u; 2)
     | u ->
         let last = i + 3 in
-        if last > max then 0 else
+        if last > max then -4 else
         let u' = u - 0x10000 in
         let hi = (0xD800 lor (u' lsr 10)) in
         let lo = (0xDC00 lor (u' land 0x3FF)) in
@@ -368,7 +368,7 @@ module Bytes = struct
       | hi ->
           let last = i + 3 in
           if last > max then false else
-          match get b i with
+          match get b (i + 2) with
           | u when u < 0xDC00 || u > 0xDFFF -> false
           | lo -> loop max b (i + 4)
     in
