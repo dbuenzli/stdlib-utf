@@ -8,12 +8,13 @@ let mod_srcs n = file (n ^ ".mli"), file (n ^ ".ml")
 
 let iface = file "utf_x.mli"
 let uchar_mli, uchar_ml = mod_srcs "utf_uchar"
+let utf_16_ml = file "utf_16.ml"
 let adhoc_mli, adhoc_ml = mod_srcs "utf_x_adhoc"
 let if_mli, if_ml = mod_srcs "utf_x_if"
 let dfa_mli, dfa_ml = mod_srcs "utf_x_dfa"
 let pat_mli, pat_ml = mod_srcs "utf_x_pat"
 
-let base = [iface; uchar_mli; uchar_ml]
+let base = [iface; uchar_mli; uchar_ml; utf_16_ml]
 let all_impls =
   [adhoc_mli; adhoc_ml; if_mli; if_ml; dfa_mli; dfa_ml; pat_mli; pat_ml ] @
   base
