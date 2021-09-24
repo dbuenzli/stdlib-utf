@@ -27,9 +27,9 @@ let test =
   let srcs = (file "test.ml" :: all_impls) in
   B0_ocaml.exe "test" ~doc:"Test suite" ~srcs
 
-let test8_long =
-  let srcs = (file "test8_long.ml" :: all_impls) in
-  B0_ocaml.exe "test8_long" ~doc:"Long UTF-8 conformance test" ~srcs
+let test =
+  let srcs = (file "test_long.ml" :: all_impls) in
+  B0_ocaml.exe "test_long" ~doc:"Long test suite" ~srcs
 
 let perf8 =
   let srcs = (file "perf8.ml" :: all_impls) in

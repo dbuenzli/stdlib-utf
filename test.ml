@@ -24,6 +24,9 @@ let fold_uchars f acc =
   in
   loop f acc Uchar.min
 
+(* This tests that we encode and decode each character according
+   to its specification. *)
+
 let utf_8_spec =
   (* UTF-8 byte sequences, cf. table 3.7 Unicode 14. *)
   [(0x0000,0x007F),     [|(0x00,0x7F)|];
@@ -131,7 +134,8 @@ let () =
   ()
 
 let () =
-  (* Test used bytes for replacement WHATWG recommandation.
+  (* Test used bytes and replacement according to WHATWG recommendation.
+     This is just a recommandation.
      These examples are from TUS p. 126-127 Unicode 14  *)
   let b = Bytes.of_string "\xC0\xAF\xE0\x80\xBF\xF0\x81\x82\x41" in
   let ok i = i = Bytes.length b - 1 in
