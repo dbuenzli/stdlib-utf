@@ -127,10 +127,10 @@
     | u when u < 0 -> assert false
     | u when u <= 0xFFFF ->
         let last = i + 1 in
-        if last > max then -2 else (set b i u; 2)
+        if last > max then 0 else (set b i u; 2)
     | u ->
         let last = i + 3 in
-        if last > max then -4 else
+        if last > max then 0 else
         let u' = u - 0x10000 in
         let hi = (0xD800 lor (u' lsr 10)) in
         let lo = (0xDC00 lor (u' land 0x3FF)) in
