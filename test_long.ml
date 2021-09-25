@@ -67,19 +67,19 @@ let test_seqs utf utf_encs get_utf_char =
       set s2 0 b0;
       for b1 = 0x00 to 0xFF do
         set s2 1 b1;
-	      if test s2 then ((* this prefix decoded, stop here *)) else begin
-         set s3 0 b0;
-         set s3 1 b1;
-	       for b2 = 0x00 to 0xFF do
-          set s3 2 b2;
-	        if test s3 then ((* this prefix decoded, stop here *)) else begin
-           set s4 0 b0;
-           set s4 1 b1;
-           set s4 2 b2;
-	         for b3 = 0x00 to 0xFF do set s4 3 b3; ignore (test s4) done;
-	       end
-	      done;
-	     end
+        if test s2 then ((* this prefix decoded, stop here *)) else begin
+          set s3 0 b0;
+          set s3 1 b1;
+          for b2 = 0x00 to 0xFF do
+            set s3 2 b2;
+            if test s3 then ((* this prefix decoded, stop here *)) else begin
+              set s4 0 b0;
+              set s4 1 b1;
+              set s4 2 b2;
+              for b3 = 0x00 to 0xFF do set s4 3 b3; ignore (test s4) done;
+            end
+        done;
+       end
       done;
     end
   done
