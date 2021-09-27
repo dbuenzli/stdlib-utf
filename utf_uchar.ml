@@ -28,7 +28,7 @@ let valid_bit = 27
 let decode_bits = 24
 
 let[@inline] utf_decode n u = ((8 lor n) lsl decode_bits) lor (Uchar.to_int u)
-let[@inline] utf_decode_error n = (n lsl decode_bits) lor 0xFFFD (* rep *)
+let[@inline] utf_decode_error n = (n lsl decode_bits) lor 0x800FFFD (* rep *)
 let[@inline] utf_decode_is_valid d = (d lsr valid_bit) = 1
 let[@inline] utf_decode_used_bytes d = (d lsr decode_bits) land 0b111
 let[@inline] utf_decode_uchar d = Uchar.unsafe_of_int (d land 0xFFFFFF)
