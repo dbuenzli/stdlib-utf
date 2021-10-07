@@ -49,7 +49,7 @@ let adhoc_best_effort_decode s =
   let rec loop b i =
     if i >= Utf_x_adhoc.Bytes.length b then () else
     let d = Utf_x_adhoc.Bytes.get_utf_8_uchar b i in
-    let used = Utf_x_adhoc.Uchar.utf_decode_used_bytes d in
+    let used = Utf_x_adhoc.Uchar.utf_decode_length d in
     let u = Utf_x_adhoc.Uchar.utf_decode_uchar d in
     Sys.opaque_identity @@ (ignore u);
     loop b (i + used)
@@ -60,7 +60,7 @@ let dfa_best_effort_decode s =
   let rec loop b i =
     if i >= Utf_x_dfa.Bytes.length b then () else
     let d = Utf_x_dfa.Bytes.get_utf_8_uchar b i in
-    let used = Utf_x_dfa.Uchar.utf_decode_used_bytes d in
+    let used = Utf_x_dfa.Uchar.utf_decode_length d in
     let u = Utf_x_dfa.Uchar.utf_decode_uchar d in
     Sys.opaque_identity @@ (ignore u);
     loop b (i + used)
@@ -71,7 +71,7 @@ let if_best_effort_decode s =
   let rec loop b i =
     if i >= Utf_x_if.Bytes.length b then () else
     let d = Utf_x_if.Bytes.get_utf_8_uchar b i in
-    let used = Utf_x_if.Uchar.utf_decode_used_bytes d in
+    let used = Utf_x_if.Uchar.utf_decode_length d in
     let u = Utf_x_if.Uchar.utf_decode_uchar d in
     Sys.opaque_identity @@ (ignore u);
     loop b (i + used)
@@ -82,7 +82,7 @@ let pat_best_effort_decode s =
   let rec loop b i =
     if i >= Utf_x_pat.Bytes.length b then () else
     let d = Utf_x_pat.Bytes.get_utf_8_uchar b i in
-    let used = Utf_x_pat.Uchar.utf_decode_used_bytes d in
+    let used = Utf_x_pat.Uchar.utf_decode_length d in
     let u = Utf_x_pat.Uchar.utf_decode_uchar d in
     Sys.opaque_identity @@ (ignore u);
     loop b (i + used)
@@ -116,7 +116,7 @@ let adhoc_recode s =
     match Utf_x_adhoc.Uchar.utf_decode_is_valid d with
     | false -> raise Exit
     | true ->
-        let used = Utf_x_adhoc.Uchar.utf_decode_used_bytes d in
+        let used = Utf_x_adhoc.Uchar.utf_decode_length d in
         let u = Utf_x_adhoc.Uchar.utf_decode_uchar d in
         match Utf_x_adhoc.Bytes.set_utf_8_uchar b' j u with
         | 0 -> raise Exit
@@ -134,7 +134,7 @@ let dfa_recode s =
     match Utf_x_dfa.Uchar.utf_decode_is_valid d with
     | false -> raise Exit
     | true ->
-        let used = Utf_x_dfa.Uchar.utf_decode_used_bytes d in
+        let used = Utf_x_dfa.Uchar.utf_decode_length d in
         let u = Utf_x_dfa.Uchar.utf_decode_uchar d in
         match Utf_x_dfa.Bytes.set_utf_8_uchar b' j u with
         | 0 -> raise Exit
@@ -152,7 +152,7 @@ let if_recode s =
     match Utf_x_if.Uchar.utf_decode_is_valid d with
     | false -> raise Exit
     | true ->
-        let used = Utf_x_if.Uchar.utf_decode_used_bytes d in
+        let used = Utf_x_if.Uchar.utf_decode_length d in
         let u = Utf_x_if.Uchar.utf_decode_uchar d in
         match Utf_x_if.Bytes.set_utf_8_uchar b' j u with
         | 0 -> raise Exit
@@ -170,7 +170,7 @@ let pat_recode s =
     match Utf_x_pat.Uchar.utf_decode_is_valid d with
     | false -> raise Exit
     | true ->
-        let used = Utf_x_pat.Uchar.utf_decode_used_bytes d in
+        let used = Utf_x_pat.Uchar.utf_decode_length d in
         let u = Utf_x_pat.Uchar.utf_decode_uchar d in
         match Utf_x_pat.Bytes.set_utf_8_uchar b' j u with
         | 0 -> raise Exit

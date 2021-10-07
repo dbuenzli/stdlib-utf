@@ -148,7 +148,7 @@ module Bytes = struct
       if i >= length b then true else
       let dec = get_utf_8_uchar b i in
       if Uchar.utf_decode_is_valid dec
-      then loop b (i + Uchar.utf_decode_used_bytes dec)
+      then loop b (i + Uchar.utf_decode_length dec)
       else false
     in
     loop b 0

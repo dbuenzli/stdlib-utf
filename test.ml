@@ -95,7 +95,7 @@ let test_utf utf utf_len get_utf set_utf utf_is_valid =
     assert (Bytes.equal buf (uchar_map_get u utf));
     let dec = get_utf buf 0 in
     assert (Uchar.utf_decode_is_valid dec);
-    assert (Uchar.utf_decode_used_bytes dec = utf_len);
+    assert (Uchar.utf_decode_length dec = utf_len);
     assert (Uchar.equal (Uchar.utf_decode_uchar dec) u);
     assert (utf_is_valid buf);
     ()
@@ -143,11 +143,11 @@ let () =
     let dec = Bytes.get_utf_8_uchar b i in
     if not (ok i) then begin
       assert (Uchar.utf_decode_is_valid dec = false);
-      assert (Uchar.utf_decode_used_bytes dec = 1);
+      assert (Uchar.utf_decode_length dec = 1);
       assert (Uchar.equal (Uchar.utf_decode_uchar dec) Uchar.rep)
     end else begin
       assert (Uchar.utf_decode_is_valid dec = true);
-      assert (Uchar.utf_decode_used_bytes dec = 1);
+      assert (Uchar.utf_decode_length dec = 1);
       assert (Uchar.equal (Uchar.utf_decode_uchar dec) (Uchar.of_int 0x0041))
     end
   done;
@@ -157,11 +157,11 @@ let () =
     let dec = Bytes.get_utf_8_uchar b i in
     if not (ok i) then begin
       assert (Uchar.utf_decode_is_valid dec = false);
-      assert (Uchar.utf_decode_used_bytes dec = 1);
+      assert (Uchar.utf_decode_length dec = 1);
       assert (Uchar.equal (Uchar.utf_decode_uchar dec) Uchar.rep)
     end else begin
       assert (Uchar.utf_decode_is_valid dec = true);
-      assert (Uchar.utf_decode_used_bytes dec = 1);
+      assert (Uchar.utf_decode_length dec = 1);
       assert (Uchar.equal (Uchar.utf_decode_uchar dec) (Uchar.of_int 0x0041))
     end
   done;
@@ -171,11 +171,11 @@ let () =
     let dec = Bytes.get_utf_8_uchar b i in
     if not (ok i) then begin
       assert (Uchar.utf_decode_is_valid dec = false);
-      assert (Uchar.utf_decode_used_bytes dec = 1);
+      assert (Uchar.utf_decode_length dec = 1);
       assert (Uchar.equal (Uchar.utf_decode_uchar dec) Uchar.rep)
     end else begin
       assert (Uchar.utf_decode_is_valid dec = true);
-      assert (Uchar.utf_decode_used_bytes dec = 1);
+      assert (Uchar.utf_decode_length dec = 1);
       assert (Uchar.equal (Uchar.utf_decode_uchar dec)
                 (Uchar.of_char (Bytes.get b i)))
     end
@@ -183,22 +183,22 @@ let () =
   let b = Bytes.of_string "\xE1\x80\xE2\xF0\x91\x92\xF1\xBF\x41" in
   let d0 = Bytes.get_utf_8_uchar b 0 in
   assert (Uchar.utf_decode_is_valid d0 = false);
-  assert (Uchar.utf_decode_used_bytes d0 = 2);
+  assert (Uchar.utf_decode_length d0 = 2);
   assert (Uchar.equal (Uchar.utf_decode_uchar d0) Uchar.rep);
   let d2 = Bytes.get_utf_8_uchar b 2 in
   assert (Uchar.utf_decode_is_valid d2 = false);
-  assert (Uchar.utf_decode_used_bytes d2 = 1);
+  assert (Uchar.utf_decode_length d2 = 1);
   assert (Uchar.equal (Uchar.utf_decode_uchar d2) Uchar.rep);
   let d3 = Bytes.get_utf_8_uchar b 3 in
   assert (Uchar.utf_decode_is_valid d3 = false);
-  assert (Uchar.utf_decode_used_bytes d3 = 3);
+  assert (Uchar.utf_decode_length d3 = 3);
   assert (Uchar.equal (Uchar.utf_decode_uchar d3) Uchar.rep);
   let d6 = Bytes.get_utf_8_uchar b 6 in
   assert (Uchar.utf_decode_is_valid d6 = false);
-  assert (Uchar.utf_decode_used_bytes d6 = 2);
+  assert (Uchar.utf_decode_length d6 = 2);
   assert (Uchar.equal (Uchar.utf_decode_uchar d6) Uchar.rep);
   let d8 = Bytes.get_utf_8_uchar b 8 in
-  assert (Uchar.utf_decode_used_bytes d8 = 1);
+  assert (Uchar.utf_decode_length d8 = 1);
   assert (Uchar.equal (Uchar.utf_decode_uchar d8) (Uchar.of_int 0x0041));
   ()
 

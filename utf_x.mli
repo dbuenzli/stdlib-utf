@@ -20,35 +20,37 @@ module type Uchar = sig
 
   (** {1:utf_codec UTF codecs tools}
 
-      @since 4.XX *)
+      @since 4.14 *)
 
   type utf_decode [@@immediate]
   (** The type for UTF decode results. Values of this type represent
       the result of a Unicode Transformation Format decoding attempt
       in a compact and allocation-free manner. *)
 
-  val utf_decode : int -> Uchar.t -> utf_decode
-  (** [utf_decode n u] is a valid UTF decode for [u] that consumed [n] bytes
-      for the decode. [n] must be positive and smaller or equal to [4] (this
-      is not checked by the module). *)
-
-  val utf_decode_error : int -> utf_decode
-  (** [utf_decode_error n] is an invalid UTF decode that consumed [n] bytes
-      to error. [n] must be positive and smaller or equal to [4] (this is
-      not checked by the module). *)
-
   val utf_decode_is_valid : utf_decode -> bool
   (** [utf_decode_is_valid d] is [true] if and only if [d] holds a valid
       decode. *)
 
-  val utf_decode_used_bytes : utf_decode -> int
-  (** [utf_decode_used_bytes d] is the number of bytes consumed by the
-      decode [d]. This is always strictly positive and smaller or equal
-      to 4. *)
-
   val utf_decode_uchar : utf_decode -> Uchar.t
   (** [utf_x_decode_uchar d] is the Unicode character decoded by [d] if
       [utf_x_decode_is_valid d] is [true] and {!Uchar.rep} otherwise. *)
+
+  val utf_decode_length : utf_decode -> int
+  (** [utf_decode_length d] is the number of elements from the source
+      that were consumed by the decode [d]. This is always strictly
+      positive and smaller or equal to [4]. The kind of source elements
+      depends on the actual decoder; for the decoders of the standard
+      library this function always returns a length in bytes. *)
+
+  val utf_decode : int -> Uchar.t -> utf_decode
+  (** [utf_decode n u] is a valid UTF decode for [u] that consumed [n]
+      elements from the source for decoding. [n] must be positive and
+      smaller or equal to [4] (this is not checked by the module). *)
+
+  val utf_decode_error : int -> utf_decode
+  (** [utf_decode_error n] is an invalid UTF decode that consumed [n]
+      elements from the source to error. [n] must be positive and
+      smaller or equal to [4] (this is not checked by the module). *)
 
   val utf_8_byte_length : t -> int
   (** [utf_8_byte_length u] is the number of bytes needed to encode
@@ -68,7 +70,7 @@ module Bytes : sig
 
   (** {1:utf_x_codecs UTF-X codecs and validations}
 
-      @since 4.XX *)
+      @since 4.14 *)
 
   (** {2:utf_8 UTF-8} *)
 

@@ -25,7 +25,7 @@ let adhoc_trip s b =
   let rec loop b i buf =
     if i >= Utf_x_adhoc.Bytes.length b then () else
     let d = Utf_x_adhoc.Bytes.get_utf_8_uchar b i in
-    let used = Utf_x_adhoc.Uchar.utf_decode_used_bytes d in
+    let used = Utf_x_adhoc.Uchar.utf_decode_length d in
     Buffer.add_utf_8_uchar buf (Utf_x_adhoc.Uchar.utf_decode_uchar d);
     loop b (i + used) buf
   in
@@ -35,7 +35,7 @@ let dfa_trip s b =
   let rec loop b i buf =
     if i >= Utf_x_dfa.Bytes.length b then () else
     let d = Utf_x_dfa.Bytes.get_utf_8_uchar b i in
-    let used = Utf_x_dfa.Uchar.utf_decode_used_bytes d in
+    let used = Utf_x_dfa.Uchar.utf_decode_length d in
     Buffer.add_utf_8_uchar buf (Utf_x_dfa.Uchar.utf_decode_uchar d);
     loop b (i + used) buf
   in
@@ -45,7 +45,7 @@ let if_trip s b =
   let rec loop b i buf =
     if i >= Utf_x_if.Bytes.length b then () else
     let d = Utf_x_if.Bytes.get_utf_8_uchar b i in
-    let used = Utf_x_if.Uchar.utf_decode_used_bytes d in
+    let used = Utf_x_if.Uchar.utf_decode_length d in
     Buffer.add_utf_8_uchar buf (Utf_x_if.Uchar.utf_decode_uchar d);
     loop b (i + used) buf
   in
@@ -55,7 +55,7 @@ let pat_trip s b =
   let rec loop b i buf =
     if i >= Utf_x_pat.Bytes.length b then () else
     let d = Utf_x_pat.Bytes.get_utf_8_uchar b i in
-    let used = Utf_x_pat.Uchar.utf_decode_used_bytes d in
+    let used = Utf_x_pat.Uchar.utf_decode_length d in
     Buffer.add_utf_8_uchar buf (Utf_x_pat.Uchar.utf_decode_uchar d);
     loop b (i + used) buf
   in
