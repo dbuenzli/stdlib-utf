@@ -15,7 +15,7 @@
 
   (* This won't be needed *)
 
-  let dec_err = Utf_uchar.utf_decode_error
+  let dec_invalid = Utf_uchar.utf_decode_invalid
   let[@inline] dec_ret n u = Utf_uchar.utf_decode n (Uchar.unsafe_of_int u)
   external length : bytes -> int = "%bytes_length"
   type t = Bytes.t
@@ -52,15 +52,15 @@
     let get = unsafe_get_uint16_be in
     let max = length b - 1 in
     if i < 0 || i > max then invalid_arg "index out of bounds" else
-    if i = max then dec_err 1 else
+    if i = max then dec_invalid 1 else
     match get b i with
     | u when u < 0xD800 || u > 0xDFFF -> dec_ret 2 u
-    | u when u > 0xDBFF -> dec_err 2
+    | u when u > 0xDBFF -> dec_invalid 2
     | hi -> (* combine [hi] with a low surrogate *)
         let last = i + 3 in
-        if last > max then dec_err (max - i + 1) else
+        if last > max then dec_invalid (max - i + 1) else
         match get b (i + 2) with
-        | u when u < 0xDC00 || u > 0xDFFF -> dec_err 2 (* retry here *)
+        | u when u < 0xDC00 || u > 0xDFFF -> dec_invalid 2 (* retry here *)
         | lo ->
             let u = (((hi land 0x3FF) lsl 10) lor (lo land 0x3FF)) + 0x10000 in
             dec_ret 4 u
@@ -105,15 +105,15 @@
     let get = unsafe_get_uint16_le in
     let max = length b - 1 in
     if i < 0 || i > max then invalid_arg "index out of bounds" else
-    if i = max then dec_err 1 else
+    if i = max then dec_invalid 1 else
     match get b i with
     | u when u < 0xD800 || u > 0xDFFF -> dec_ret 2 u
-    | u when u > 0xDBFF -> dec_err 2
+    | u when u > 0xDBFF -> dec_invalid 2
     | hi -> (* combine [hi] with a low surrogate *)
         let last = i + 3 in
-        if last > max then dec_err (max - i + 1) else
+        if last > max then dec_invalid (max - i + 1) else
         match get b (i + 2) with
-        | u when u < 0xDC00 || u > 0xDFFF -> dec_err 2 (* retry here *)
+        | u when u < 0xDC00 || u > 0xDFFF -> dec_invalid 2 (* retry here *)
         | lo ->
             let u = (((hi land 0x3FF) lsl 10) lor (lo land 0x3FF)) + 0x10000 in
             dec_ret 4 u

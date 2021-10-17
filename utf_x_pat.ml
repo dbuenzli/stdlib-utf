@@ -24,7 +24,7 @@ module Bytes = struct
 
   (* UTF-X codecs and validations *)
 
-  let dec_err = Uchar.utf_decode_error
+  let dec_invalid = Uchar.utf_decode_invalid
   let[@inline] dec_ret n u = Uchar.utf_decode n (Uchar.unsafe_of_int u)
 
   (* In case of decoding error, if we error on the first byte, we
@@ -71,52 +71,52 @@ module Bytes = struct
     match Char.unsafe_chr b0 with (* See The Unicode Standard, Table 3.7 *)
     | '\x00' .. '\x7F' -> dec_ret 1 b0
     | '\xC2' .. '\xDF' ->
-        let i = i + 1 in if i > max then dec_err 1 else
-        let b1 = get b i in if not_in_x80_to_xBF b1 then dec_err 1 else
+        let i = i + 1 in if i > max then dec_invalid 1 else
+        let b1 = get b i in if not_in_x80_to_xBF b1 then dec_invalid 1 else
         dec_ret 2 (utf_8_uchar_2 b0 b1)
     | '\xE0' ->
-        let i = i + 1 in if i > max then dec_err 1 else
-        let b1 = get b i in if not_in_xA0_to_xBF b1 then dec_err 1 else
-        let i = i + 1 in if i > max then dec_err 2 else
-        let b2 = get b i in if not_in_x80_to_xBF b2 then dec_err 2 else
+        let i = i + 1 in if i > max then dec_invalid 1 else
+        let b1 = get b i in if not_in_xA0_to_xBF b1 then dec_invalid 1 else
+        let i = i + 1 in if i > max then dec_invalid 2 else
+        let b2 = get b i in if not_in_x80_to_xBF b2 then dec_invalid 2 else
         dec_ret 3 (utf_8_uchar_3 b0 b1 b2)
     | '\xE1' .. '\xEC' | '\xEE' .. '\xEF' ->
-        let i = i + 1 in if i > max then dec_err 1 else
-        let b1 = get b i in if not_in_x80_to_xBF b1 then dec_err 1 else
-        let i = i + 1 in if i > max then dec_err 2 else
-        let b2 = get b i in if not_in_x80_to_xBF b2 then dec_err 2 else
+        let i = i + 1 in if i > max then dec_invalid 1 else
+        let b1 = get b i in if not_in_x80_to_xBF b1 then dec_invalid 1 else
+        let i = i + 1 in if i > max then dec_invalid 2 else
+        let b2 = get b i in if not_in_x80_to_xBF b2 then dec_invalid 2 else
         dec_ret 3 (utf_8_uchar_3 b0 b1 b2)
     | '\xED' ->
-        let i = i + 1 in if i > max then dec_err 1 else
-        let b1 = get b i in if not_in_x80_to_x9F b1 then dec_err 1 else
-        let i = i + 1 in if i > max then dec_err 2 else
-        let b2 = get b i in if not_in_x80_to_xBF b2 then dec_err 2 else
+        let i = i + 1 in if i > max then dec_invalid 1 else
+        let b1 = get b i in if not_in_x80_to_x9F b1 then dec_invalid 1 else
+        let i = i + 1 in if i > max then dec_invalid 2 else
+        let b2 = get b i in if not_in_x80_to_xBF b2 then dec_invalid 2 else
         dec_ret 3 (utf_8_uchar_3 b0 b1 b2)
     | '\xF0' ->
-        let i = i + 1 in if i > max then dec_err 1 else
-        let b1 = get b i in if not_in_x90_to_xBF b1 then dec_err 1 else
-        let i = i + 1 in if i > max then dec_err 2 else
-        let b2 = get b i in if not_in_x80_to_xBF b2 then dec_err 2 else
-        let i = i + 1 in if i > max then dec_err 3 else
-        let b3 = get b i in if not_in_x80_to_xBF b3 then dec_err 3 else
+        let i = i + 1 in if i > max then dec_invalid 1 else
+        let b1 = get b i in if not_in_x90_to_xBF b1 then dec_invalid 1 else
+        let i = i + 1 in if i > max then dec_invalid 2 else
+        let b2 = get b i in if not_in_x80_to_xBF b2 then dec_invalid 2 else
+        let i = i + 1 in if i > max then dec_invalid 3 else
+        let b3 = get b i in if not_in_x80_to_xBF b3 then dec_invalid 3 else
         dec_ret 4 (utf_8_uchar_4 b0 b1 b2 b3)
     | '\xF1' .. '\xF3' ->
-        let i = i + 1 in if i > max then dec_err 1 else
-        let b1 = get b i in if not_in_x80_to_xBF b1 then dec_err 1 else
-        let i = i + 1 in if i > max then dec_err 2 else
-        let b2 = get b i in if not_in_x80_to_xBF b2 then dec_err 2 else
-        let i = i + 1 in if i > max then dec_err 3 else
-        let b3 = get b i in if not_in_x80_to_xBF b3 then dec_err 3 else
+        let i = i + 1 in if i > max then dec_invalid 1 else
+        let b1 = get b i in if not_in_x80_to_xBF b1 then dec_invalid 1 else
+        let i = i + 1 in if i > max then dec_invalid 2 else
+        let b2 = get b i in if not_in_x80_to_xBF b2 then dec_invalid 2 else
+        let i = i + 1 in if i > max then dec_invalid 3 else
+        let b3 = get b i in if not_in_x80_to_xBF b3 then dec_invalid 3 else
         dec_ret 4 (utf_8_uchar_4 b0 b1 b2 b3)
     | '\xF4' ->
-        let i = i + 1 in if i > max then dec_err 1 else
-        let b1 = get b i in if not_in_x80_to_x8F b1 then dec_err 1 else
-        let i = i + 1 in if i > max then dec_err 2 else
-        let b2 = get b i in if not_in_x80_to_xBF b2 then dec_err 2 else
-        let i = i + 1 in if i > max then dec_err 3 else
-        let b3 = get b i in if not_in_x80_to_xBF b3 then dec_err 3 else
+        let i = i + 1 in if i > max then dec_invalid 1 else
+        let b1 = get b i in if not_in_x80_to_x8F b1 then dec_invalid 1 else
+        let i = i + 1 in if i > max then dec_invalid 2 else
+        let b2 = get b i in if not_in_x80_to_xBF b2 then dec_invalid 2 else
+        let i = i + 1 in if i > max then dec_invalid 3 else
+        let b3 = get b i in if not_in_x80_to_xBF b3 then dec_invalid 3 else
         dec_ret 4 (utf_8_uchar_4 b0 b1 b2 b3)
-    | _ -> dec_err 1
+    | _ -> dec_invalid 1
 
   let set_utf_8_uchar b i u =
     let set = unsafe_set_uint8 in

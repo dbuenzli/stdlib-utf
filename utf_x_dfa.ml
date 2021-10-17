@@ -24,7 +24,7 @@ module Bytes = struct
 
   (* UTF-X codecs and validations *)
 
-  let dec_err = Uchar.utf_decode_error
+  let dec_invalid = Uchar.utf_decode_invalid
   let[@inline] dec_ret n u = Uchar.utf_decode n (Uchar.unsafe_of_int u)
 
   (* UTF-8 *)
@@ -106,9 +106,9 @@ module Bytes = struct
       then stop := true
       else (incr j; if !j > max then stop := true);
     done;
-    if !j > max then dec_err (!j - i) else
+    if !j > max then dec_invalid (!j - i) else
     if !st = accept then dec_ret (!j - i + 1) !u else
-    if !st = reject then dec_err (if i = !j then 1 else (!j - i)) else
+    if !st = reject then dec_invalid (if i = !j then 1 else (!j - i)) else
     assert false
 
   let set_utf_8_uchar b i u =

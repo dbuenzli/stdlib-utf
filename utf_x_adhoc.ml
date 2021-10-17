@@ -49,7 +49,7 @@ module Bytes = struct
 
   (* UTF-X codecs and validations *)
 
-  let dec_err = Uchar.utf_decode_error
+  let dec_invalid = Uchar.utf_decode_invalid
   let[@inline] dec_ret n u = Uchar.utf_decode n (Uchar.unsafe_of_int u)
 
   (* In case of decoding error, if we error on the first byte, we
@@ -135,52 +135,52 @@ module Bytes = struct
     match get utf_8_decode_case' b0 with
     | 0 (* 00..7F *) -> dec_ret 1 b0
     | 1 (* C2..DF *) ->
-        let i = i + 1 in if i > max then dec_err 1 else
-        let b1 = get b i in if not_in_x80_to_xBF b1 then dec_err 1 else
+        let i = i + 1 in if i > max then dec_invalid 1 else
+        let b1 = get b i in if not_in_x80_to_xBF b1 then dec_invalid 1 else
         dec_ret 2 (utf_8_uchar_2 b0 b1)
     | 2 (* E0 *) ->
-        let i = i + 1 in if i > max then dec_err 1 else
-        let b1 = get b i in if not_in_xA0_to_xBF b1 then dec_err 1 else
-        let i = i + 1 in if i > max then dec_err 2 else
-        let b2 = get b i in if not_in_x80_to_xBF b2 then dec_err 2 else
+        let i = i + 1 in if i > max then dec_invalid 1 else
+        let b1 = get b i in if not_in_xA0_to_xBF b1 then dec_invalid 1 else
+        let i = i + 1 in if i > max then dec_invalid 2 else
+        let b2 = get b i in if not_in_x80_to_xBF b2 then dec_invalid 2 else
         dec_ret 3 (utf_8_uchar_3 b0 b1 b2)
     | 3 -> (* E1..EC or EE..EF *)
-        let i = i + 1 in if i > max then dec_err 1 else
-        let b1 = get b i in if not_in_x80_to_xBF b1 then dec_err 1 else
-        let i = i + 1 in if i > max then dec_err 2 else
-        let b2 = get b i in if not_in_x80_to_xBF b2 then dec_err 2 else
+        let i = i + 1 in if i > max then dec_invalid 1 else
+        let b1 = get b i in if not_in_x80_to_xBF b1 then dec_invalid 1 else
+        let i = i + 1 in if i > max then dec_invalid 2 else
+        let b2 = get b i in if not_in_x80_to_xBF b2 then dec_invalid 2 else
         dec_ret 3 (utf_8_uchar_3 b0 b1 b2)
     | 4 -> (* ED *)
-        let i = i + 1 in if i > max then dec_err 1 else
-        let b1 = get b i in if not_in_x80_to_x9F b1 then dec_err 1 else
-        let i = i + 1 in if i > max then dec_err 2 else
-        let b2 = get b i in if not_in_x80_to_xBF b2 then dec_err 2 else
+        let i = i + 1 in if i > max then dec_invalid 1 else
+        let b1 = get b i in if not_in_x80_to_x9F b1 then dec_invalid 1 else
+        let i = i + 1 in if i > max then dec_invalid 2 else
+        let b2 = get b i in if not_in_x80_to_xBF b2 then dec_invalid 2 else
         dec_ret 3 (utf_8_uchar_3 b0 b1 b2)
     | 5 -> (* F0 *)
-        let i = i + 1 in if i > max then dec_err 1 else
-        let b1 = get b i in if not_in_x90_to_xBF b1 then dec_err 1 else
-        let i = i + 1 in if i > max then dec_err 2 else
-        let b2 = get b i in if not_in_x80_to_xBF b2 then dec_err 2 else
-        let i = i + 1 in if i > max then dec_err 3 else
-        let b3 = get b i in if not_in_x80_to_xBF b3 then dec_err 3 else
+        let i = i + 1 in if i > max then dec_invalid 1 else
+        let b1 = get b i in if not_in_x90_to_xBF b1 then dec_invalid 1 else
+        let i = i + 1 in if i > max then dec_invalid 2 else
+        let b2 = get b i in if not_in_x80_to_xBF b2 then dec_invalid 2 else
+        let i = i + 1 in if i > max then dec_invalid 3 else
+        let b3 = get b i in if not_in_x80_to_xBF b3 then dec_invalid 3 else
         dec_ret 4 (utf_8_uchar_4 b0 b1 b2 b3)
     | 6 -> (* F1..F3 *)
-        let i = i + 1 in if i > max then dec_err 1 else
-        let b1 = get b i in if not_in_x80_to_xBF b1 then dec_err 1 else
-        let i = i + 1 in if i > max then dec_err 2 else
-        let b2 = get b i in if not_in_x80_to_xBF b2 then dec_err 2 else
-        let i = i + 1 in if i > max then dec_err 3 else
-        let b3 = get b i in if not_in_x80_to_xBF b3 then dec_err 3 else
+        let i = i + 1 in if i > max then dec_invalid 1 else
+        let b1 = get b i in if not_in_x80_to_xBF b1 then dec_invalid 1 else
+        let i = i + 1 in if i > max then dec_invalid 2 else
+        let b2 = get b i in if not_in_x80_to_xBF b2 then dec_invalid 2 else
+        let i = i + 1 in if i > max then dec_invalid 3 else
+        let b3 = get b i in if not_in_x80_to_xBF b3 then dec_invalid 3 else
         dec_ret 4 (utf_8_uchar_4 b0 b1 b2 b3)
     | 7 -> (* F4 *)
-        let i = i + 1 in if i > max then dec_err 1 else
-        let b1 = get b i in if not_in_x80_to_x8F b1 then dec_err 1 else
-        let i = i + 1 in if i > max then dec_err 2 else
-        let b2 = get b i in if not_in_x80_to_xBF b2 then dec_err 2 else
-        let i = i + 1 in if i > max then dec_err 3 else
-        let b3 = get b i in if not_in_x80_to_xBF b3 then dec_err 3 else
+        let i = i + 1 in if i > max then dec_invalid 1 else
+        let b1 = get b i in if not_in_x80_to_x8F b1 then dec_invalid 1 else
+        let i = i + 1 in if i > max then dec_invalid 2 else
+        let b2 = get b i in if not_in_x80_to_xBF b2 then dec_invalid 2 else
+        let i = i + 1 in if i > max then dec_invalid 3 else
+        let b3 = get b i in if not_in_x80_to_xBF b3 then dec_invalid 3 else
         dec_ret 4 (utf_8_uchar_4 b0 b1 b2 b3)
-    | 8 -> dec_err 1
+    | 8 -> dec_invalid 1
     | _ -> assert false
 
   let set_utf_8_uchar b i u =
@@ -274,15 +274,15 @@ module Bytes = struct
     let get = unsafe_get_uint16_be in
     let max = length b - 1 in
     if i < 0 || i > max then invalid_arg "index out of bounds" else
-    if i = max then dec_err 1 else
+    if i = max then dec_invalid 1 else
     match get b i with
     | u when u < 0xD800 || u > 0xDFFF -> dec_ret 2 u
-    | u when u > 0xDBFF -> dec_err 2
+    | u when u > 0xDBFF -> dec_invalid 2
     | hi -> (* combine [hi] with a low surrogate *)
         let last = i + 3 in
-        if last > max then dec_err (max - i + 1) else
+        if last > max then dec_invalid (max - i + 1) else
         match get b (i + 2) with
-        | u when u < 0xDC00 || u > 0xDFFF -> dec_err 2 (* retry here *)
+        | u when u < 0xDC00 || u > 0xDFFF -> dec_invalid 2 (* retry here *)
         | lo ->
             let u = (((hi land 0x3FF) lsl 10) lor (lo land 0x3FF)) + 0x10000 in
             dec_ret 4 u
@@ -327,15 +327,15 @@ module Bytes = struct
     let get = unsafe_get_uint16_le in
     let max = length b - 1 in
     if i < 0 || i > max then invalid_arg "index out of bounds" else
-    if i = max then dec_err 1 else
+    if i = max then dec_invalid 1 else
     match get b i with
     | u when u < 0xD800 || u > 0xDFFF -> dec_ret 2 u
-    | u when u > 0xDBFF -> dec_err 2
+    | u when u > 0xDBFF -> dec_invalid 2
     | hi -> (* combine [hi] with a low surrogate *)
         let last = i + 3 in
-        if last > max then dec_err (max - i + 1) else
+        if last > max then dec_invalid (max - i + 1) else
         match get b (i + 2) with
-        | u when u < 0xDC00 || u > 0xDFFF -> dec_err 2 (* retry here *)
+        | u when u < 0xDC00 || u > 0xDFFF -> dec_invalid 2 (* retry here *)
         | lo ->
             let u = (((hi land 0x3FF) lsl 10) lor (lo land 0x3FF)) + 0x10000 in
             dec_ret 4 u

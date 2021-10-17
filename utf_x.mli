@@ -24,8 +24,7 @@ module type Uchar = sig
 
   type utf_decode [@@immediate]
   (** The type for UTF decode results. Values of this type represent
-      the result of a Unicode Transformation Format decoding attempt
-      in a compact and allocation-free manner. *)
+      the result of a Unicode Transformation Format decoding attempt. *)
 
   val utf_decode_is_valid : utf_decode -> bool
   (** [utf_decode_is_valid d] is [true] if and only if [d] holds a valid
@@ -47,10 +46,11 @@ module type Uchar = sig
       elements from the source for decoding. [n] must be positive and
       smaller or equal to [4] (this is not checked by the module). *)
 
-  val utf_decode_error : int -> utf_decode
-  (** [utf_decode_error n] is an invalid UTF decode that consumed [n]
+  val utf_decode_invalid : int -> utf_decode
+  (** [utf_decode_invalid n] is an invalid UTF decode that consumed [n]
       elements from the source to error. [n] must be positive and
-      smaller or equal to [4] (this is not checked by the module). *)
+      smaller or equal to [4] (this is not checked by the module). The
+      resulting decode has {!rep} as the decoded Unicode character. *)
 
   val utf_8_byte_length : t -> int
   (** [utf_8_byte_length u] is the number of bytes needed to encode
