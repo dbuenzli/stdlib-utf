@@ -156,48 +156,55 @@ module Bytes = struct
       | '\x00' .. '\x7F' -> loop max b (i + 1)
       | '\xC2' .. '\xDF' ->
           let last = i + 1 in
-          last > max
+          if last > max
           || not_in_x80_to_xBF (get b last)
-          || loop max b (last + 1)
+          then false
+          else loop max b (last + 1)
       | '\xE0' ->
           let last = i + 2 in
-          last > max
+          if last > max
           || not_in_xA0_to_xBF (get b (i + 1))
           || not_in_x80_to_xBF (get b last)
-          || loop max b (last + 1)
+          then false
+          else loop max b (last + 1)
       | '\xE1' .. '\xEC' | '\xEE' .. '\xEF' ->
           let last = i + 2 in
-          last > max
+          if last > max
           || not_in_x80_to_xBF (get b (i + 1))
           || not_in_x80_to_xBF (get b last)
-          || loop max b (last + 1)
+          then false
+          else loop max b (last + 1)
       | '\xED' ->
           let last = i + 2 in
-          last > max
+          if last > max
           || not_in_x80_to_x9F (get b (i + 1))
           || not_in_x80_to_xBF (get b last)
-          || loop max b (last + 1)
+          then false
+          else loop max b (last + 1)
       | '\xF0' ->
           let last = i + 3 in
-          last > max
+          if last > max
           || not_in_x90_to_xBF (get b (i + 1))
           || not_in_x80_to_xBF (get b (i + 2))
           || not_in_x80_to_xBF (get b last)
-          || loop max b (last + 1)
+          then false
+          else loop max b (last + 1)
       | '\xF1' .. '\xF3' ->
           let last = i + 3 in
-          last > max
+          if last > max
           || not_in_x80_to_xBF (get b (i + 1))
           || not_in_x80_to_xBF (get b (i + 2))
           || not_in_x80_to_xBF (get b last)
-          || loop max b (last + 1)
+          then false
+          else loop max b (last + 1)
       | '\xF4' ->
           let last = i + 3 in
-          last > max
+          if last > max
           || not_in_x80_to_x8F (get b (i + 1))
           || not_in_x80_to_xBF (get b (i + 2))
           || not_in_x80_to_xBF (get b last)
-          || loop max b (last + 1)
+          then false
+          else loop max b (last + 1)
       | _ -> false
     in
     loop (length b - 1) b 0

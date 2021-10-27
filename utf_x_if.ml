@@ -168,56 +168,63 @@ module Bytes = struct
       if b0 land 0xE0 = 0xC0 && b0 >= 0xC2 then begin
         (* C2..DF *)
         let last = i + 1 in
-        last > max
+        if last > max
         || not_in_x80_to_xBF (get b last)
-        || loop max b (last + 1)
+        then false
+        else loop max b (last + 1)
       end else if b0 land 0xF0 = 0xE0 then begin
         if b0 = 0xE0 then begin
           (* E0 *)
           let last = i + 2 in
-          last > max
+          if last > max
           || not_in_xA0_to_xBF (get b (i + 1))
           || not_in_x80_to_xBF (get b last)
-          || loop max b (last + 1)
+          then false
+          else loop max b (last + 1)
         end else if b0 = 0xED then begin
           let last = i + 2 in
-          last > max
+          if last > max
           || not_in_x80_to_x9F (get b (i + 1))
           || not_in_x80_to_xBF (get b last)
-          || loop max b (last + 1)
+          then false
+          else loop max b (last + 1)
         end else begin
           (* E1..EC or EE..EF *)
           let last = i + 2 in
-          last > max
+          if last > max
           || not_in_x80_to_xBF (get b (i + 1))
           || not_in_x80_to_xBF (get b last)
-          || loop max b (last + 1)
+          then false
+          else loop max b (last + 1)
         end
       end else if b0 land 0xF8 = 0xF0 && b0 <= 0xF4 then begin
         if b0 = 0xF0 then begin
           (* F0 *)
           let last = i + 3 in
-          last > max
+          if last > max
           || not_in_x90_to_xBF (get b (i + 1))
           || not_in_x80_to_xBF (get b (i + 2))
           || not_in_x80_to_xBF (get b last)
-          || loop max b (last + 1)
+          then false
+          else loop max b (last + 1)
         end else if b0 = 0xF4 then begin
           (* F4 *)
           let last = i + 3 in
-          last > max
+          if last > max
           || not_in_x80_to_x8F (get b (i + 1))
           || not_in_x80_to_xBF (get b (i + 2))
           || not_in_x80_to_xBF (get b last)
-          || loop max b (last + 1)
+          then false
+          else loop max b (last + 1)
         end else begin
           (* F1..F3 *)
           let last = i + 3 in
-          last > max
+          if last > max
           || not_in_x80_to_xBF (get b (i + 1))
           || not_in_x80_to_xBF (get b (i + 2))
           || not_in_x80_to_xBF (get b last)
-          || loop max b (last + 1)
+          then false
+          else loop max b (last + 1)
         end
       end else false
     in

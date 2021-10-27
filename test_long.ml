@@ -42,17 +42,20 @@ let utf_8_encs, utf_16be_encs, utf_16le_encs =
   in
   fold_uchars add (Sset.empty, Sset.empty, Sset.empty)
 
-let test_seqs utf utf_encs get_utf_char =
+let test_seqs utf utf_encs get_utf_char is_valid_utf =
   let test seq =
     let dec = get_utf_char seq 0 in
     let valid = Uchar.utf_decode_is_valid dec in
+    let valid_seq = is_valid_utf seq in
     let is_enc = Sset.mem (Bytes.unsafe_to_string seq) utf_encs in
-    if not ((valid && is_enc) || (not valid && not is_enc)) then begin
+    if not ((valid && is_enc) || (not valid && not is_enc)) ||
+       not ((valid_seq && is_enc) || (not valid_seq && not is_enc))
+    then begin
       for i = 0 to Bytes.length seq - 1 do
         Printf.printf "%02X " (Bytes.get_uint8 seq i);
       done;
-      Printf.printf "valid: %b is_encoding: %b decode: U+%04X\n" valid is_enc
-        (Uchar.to_int (Uchar.utf_decode_uchar dec));
+      Printf.printf "valid: %b is_encoding: %b decode: U+%04X is_valid:%b\n"
+        valid is_enc (Uchar.to_int (Uchar.utf_decode_uchar dec)) valid_seq;
       assert false
     end;
     valid
@@ -85,9 +88,11 @@ let test_seqs utf utf_encs get_utf_char =
   done
 
 let () =
-  test_seqs "UTF-8" utf_8_encs Bytes.get_utf_8_uchar;
-  test_seqs "UTF-16BE" utf_16be_encs Bytes.get_utf_16be_uchar;
-  test_seqs "UTF-16LE" utf_16le_encs Bytes.get_utf_16le_uchar;
+  test_seqs "UTF-8" utf_8_encs Bytes.get_utf_8_uchar Bytes.is_valid_utf_8;
+  test_seqs "UTF-16BE"
+    utf_16be_encs Bytes.get_utf_16be_uchar Bytes.is_valid_utf_16be;
+  test_seqs "UTF-16LE"
+    utf_16le_encs Bytes.get_utf_16le_uchar Bytes.is_valid_utf_16le;
   ()
 
 let () = Printf.printf "All tests passed!\n"
