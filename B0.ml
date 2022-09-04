@@ -1,5 +1,4 @@
 open B0_kit.V000
-open B00_std
 
 let uutf = B0_ocaml.libname "uutf"
 
