@@ -2,7 +2,7 @@ open B0_kit.V000
 
 let uutf = B0_ocaml.libname "uutf"
 
-let file v = `File (Fpath.v v)
+let file v = `File (Filepath.v v)
 let mod_srcs n = file (n ^ ".mli"), file (n ^ ".ml")
 
 let iface = file "utf_x.mli"
